@@ -18,6 +18,7 @@ class PandaEnv(Env):
         self.pyrep.start()
         self.robot = Panda()
         self.robot.set_control_loop_enabled(False)
+        self.initial_joint_positions = self.robot.get_joint_positions()
         self.robot.set_motor_locked_at_zero_velocity(True)
         self.joints = joints if joints is not None \
             else [i for i in range(len(self.robot.joints))]
@@ -46,8 +47,8 @@ class PandaEnv(Env):
             joint_positions[j] = x
 
         self.target.set_position(state[:3])
-        self.robot.set_joint_positions(joint_positions)
-        self.pyrep.step()
+        self.robot.set_joint_positions(self.initial_joint_positions)
+        # self.pyrep.step()
         return self._get_state()
 
     def render(self, mode="human"):

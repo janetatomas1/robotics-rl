@@ -5,7 +5,9 @@ from env import PandaEnv
 
 scene = pathlib.Path(pathlib.Path(__file__).parent.parent, 'scenes', 'scene_panda.ttt')
 
-env = PandaEnv(scene=str(scene), joints=[0])
+env = PandaEnv(scene=str(scene))
 
 model = TD3(env=env, policy="MlpPolicy")
 model.learn(total_timesteps=100000)
+
+
