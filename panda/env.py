@@ -7,7 +7,10 @@ import numpy as np
 
 
 class PandaEnv(Env):
-    def __init__(self, scene, threshold=0.3, joints=None, episode_length=100, headless=False):
+    def __init__(self, scene, threshold=0.3, joints=None, episode_length=100, headless=False, reset_actions=10):
+        self.robot = None
+        self.target = None
+        self.reset_actions = reset_actions
         self.threshold = threshold
         self.headless = headless
         self.episode_length = episode_length
@@ -15,22 +18,17 @@ class PandaEnv(Env):
         self.scene = scene
         self.pyrep = PyRep()
         self.pyrep.launch(scene_file=self.scene, headless=headless)
-        self.pyrep.start()
-        self.robot = Panda()
-        self.robot.set_control_loop_enabled(False)
-        self.initial_joint_positions = self.robot.get_joint_positions()
-        self.robot.set_motor_locked_at_zero_velocity(True)
+        self.restart_simulation()
         self.joints = joints if joints is not None \
             else [i for i in range(len(self.robot.joints))]
-        self.target = Shape('target')
 
         _, joint_intervals = self.robot.get_joint_intervals()
         low = [joint_intervals[j][0] for j in self.joints]
         high = [joint_intervals[j][1] for j in self.joints]
 
         self.observation_space = spaces.Box(
-            low=np.array([-1., -1., 0.] + low),
-            high=np.array([1., 1., 1.] + high),
+            low=np.array([0.8, -0.2, 0.5] + low),
+            high=np.array([1.0, 0.2, 1.4] + high),
             dtype=np.float64,
         )
         self.action_space = spaces.Box(
@@ -39,16 +37,33 @@ class PandaEnv(Env):
         )
         self.timestep = self.pyrep.get_simulation_timestep()
 
+    def restart_simulation(self):
+        self.pyrep.stop()
+        self.pyrep.start()
+
+        self.robot = Panda()
+        self.target = Shape('target')
+
+        self.robot.set_control_loop_enabled(False)
+        self.robot.set_motor_locked_at_zero_velocity(True)
+
+    def move(self, action):
+        for j, v in zip(self.joints, action):
+            self.robot.joints[j].set_joint_target_velocity(v)
+
+        self.pyrep.step()
+
     def reset(self):
+        self.restart_simulation()
+        self.steps = 0
+
         state = self.observation_space.sample()
-        joint_positions = self.robot.get_joint_positions()
-
-        for j, x in zip(self.joints, state[3:]):
-            joint_positions[j] = x
-
         self.target.set_position(state[:3])
-        self.robot.set_joint_positions(self.initial_joint_positions)
-        # self.pyrep.step()
+
+        for _ in range(self.reset_actions):
+            action = self.action_space.sample()
+            self.move(action)
+
         return self._get_state()
 
     def render(self, mode="human"):
@@ -78,14 +93,8 @@ class PandaEnv(Env):
         if self.observation_space.contains(next_state):
             return self._get_state(), -100, False, self._info()
 
-        for j, v in zip(self.joints, action):
-            self.robot.joints[j].set_joint_target_velocity(v)
-
-        self.pyrep.step()
+        self.move(action)
 
         done = self._is_done()
-
-        if done:
-            self.steps = 0
 
         return self._get_state(), self._reward(), done, self._info()
