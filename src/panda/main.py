@@ -1,5 +1,8 @@
 import pathlib
 from stable_baselines3.td3 import TD3, policies
+import os
+
+print(os.environ)
 
 from env import PandaEnv
 
