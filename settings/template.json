@@ -1,0 +1,36 @@
+{
+  "image": {
+    "path": ".",
+    "name": "thesis-image",
+    "build": true
+  },
+  "volume": {
+    "path": "/opt/results",
+    "host_path_prefix": "/opt/results"
+  },
+  "container": {
+    "name": "thesis-container3"
+  },
+  "policy": {
+    "name": "TD3Policy",
+    "module": "stable_baselines3.td3.policies"
+  },
+  "algorithm": {
+    "name": "TD3",
+    "kwargs": {},
+    "train_kwargs": {
+      "total_timesteps": 100000
+    }
+  },
+  "rl_env": {
+    "module": "panda.env",
+    "name": "PandaEnv",
+    "kwargs": {
+      "scene": "/opt/robotics-rl/scenes/scene_panda.ttt",
+      "headless": true,
+      "joints": [0, 1, 2],
+      "episode_length": 200,
+      "log_dir": "/opt/results"
+    }
+  }
+}
