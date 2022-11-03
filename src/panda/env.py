@@ -7,13 +7,14 @@ import numpy as np
 
 
 class PandaEnv(Env):
-    def __init__(self, scene, threshold=0.3, joints=None, episode_length=100,
+    def __init__(self, scene, logger_class, threshold=0.3, joints=None, episode_length=100,
                  headless=False, reset_actions=10, log_dir=None):
         self.robot = None
         self.target = None
         self.reset_actions = reset_actions
         self.threshold = threshold
         self.headless = headless
+        self.log_dir = log_dir
         self.episode_length = episode_length
         self.steps = 0
         self.scene = scene
@@ -37,6 +38,8 @@ class PandaEnv(Env):
             high=np.array([2 for j in self.joints])
         )
         self.timestep = self.pyrep.get_simulation_timestep()
+
+        self.logger = logger_class("{}/values.txt".format(self.log_dir))
 
     def restart_simulation(self):
         self.pyrep.stop()
@@ -64,8 +67,6 @@ class PandaEnv(Env):
         for _ in range(self.reset_actions):
             action = self.action_space.sample()
             self.move(action)
-
-        print(self._get_state())
 
         return self._get_state()
 
@@ -99,5 +100,12 @@ class PandaEnv(Env):
         self.move(action)
 
         done = self._is_done()
+        reward = self._reward()
+        close = self._is_close()
 
-        return self._get_state(), self._reward(), done, self._info()
+        self.logger.step(reward, done, close)
+
+        return self._get_state(), reward, done, self._info()
+
+    def close(self):
+        self.logger.stop()

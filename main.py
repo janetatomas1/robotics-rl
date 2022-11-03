@@ -4,49 +4,46 @@ import json
 from json.decoder import JSONDecodeError
 import argparse
 import pathlib
+from datetime import datetime
+import git
+import string
+import random
 
 
 def main(settings):
     client = docker.DockerClient(version='auto')
 
     image_settings = settings["image"]
-    build = image_settings.get("build", True)
-    dockerfile = image_settings.get("path", None)
     image_name = image_settings.get("name", None)
 
-    if build:
-        image, _ = client.images.build(path=dockerfile, tag=image_name)
-    else:
-        image = client.images.get(name=image_name)
-
-    container_settings = settings["container"]
-    container_name = container_settings.get("name")
-
-    try:
-        container = client.containers.get(container_name)
-        container.remove()
-    except:
-        pass
+    image = client.images.get(image_name)
 
     volume_settings = settings["volume"]
     volume_path = volume_settings.get("path")
     volume_host_path_prefix = volume_settings.get("host_path_prefix")
+    container_name = ''.join(random.sample(string.ascii_lowercase + string.digits, 20))
+
     volume_host_path = "{}/{}".format(volume_host_path_prefix, container_name)
 
-    algorithm_settings = settings.get("algorithm")
-    rl_env_settings = settings.get("rl_env")
-    policy_settings = settings.get("policy")
-
+    internal_settings = json.dumps(settings.get("settings"))
     environment = {
-        "algorithm_settings": json.dumps(algorithm_settings),
-        "rl_env_settings": json.dumps(rl_env_settings),
-        "policy_settings": json.dumps(policy_settings),
         "VENV": "/opt/robotics-rl/venv/lib/python3.10/site-packages/",
+        "settings": internal_settings,
     }
 
-    client.containers.run(image=image_name, name=container_name, detach=True,
+    client.containers.run(image=image.id, detach=True, name=container_name,
                           volumes={volume_host_path: {"bind": volume_path, "mode": "rw"}},
                           environment=environment)
+
+    repository = git.Repo()
+    settings["details"] = {
+        "timestamp": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+        "commit_id": repository.head.object.hexsha,
+        "branch": repository.active_branch.name,
+    }
+
+    with open("{}/settings.json".format(volume_host_path), "w") as json_file:
+        json.dump(settings, fp=json_file, indent=2)
 
 
 if __name__ == "__main__":

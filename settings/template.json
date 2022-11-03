@@ -1,8 +1,6 @@
 {
   "image": {
-    "path": ".",
-    "name": "thesis-image",
-    "build": true
+    "name": "thesis-image"
   },
   "volume": {
     "path": "/opt/results",
@@ -11,26 +9,39 @@
   "container": {
     "name": "thesis-container3"
   },
-  "policy": {
-    "name": "TD3Policy",
-    "module": "stable_baselines3.td3.policies"
-  },
-  "algorithm": {
-    "name": "TD3",
-    "kwargs": {},
-    "train_kwargs": {
-      "total_timesteps": 100000
-    }
-  },
-  "rl_env": {
-    "module": "panda.env",
-    "name": "PandaEnv",
-    "kwargs": {
-      "scene": "/opt/robotics-rl/scenes/scene_panda.ttt",
-      "headless": true,
-      "joints": [0, 1, 2],
-      "episode_length": 200,
-      "log_dir": "/opt/results"
+  "settings": {
+    "algorithm": {
+      "name": "TD3",
+      "kwargs": {
+        "policy_kwargs": {
+          "net_arch": [100, 100]
+        }
+      },
+      "policy_kwargs": {
+        "net_arch": [100, 100]
+      },
+      "learn_kwargs": {
+        "total_timesteps": 10000000
+      }
+    },
+    "rl_env": {
+      "module": "panda.env",
+      "name": "PandaEnv",
+      "kwargs": {
+        "scene": "/opt/robotics-rl/scenes/scene_panda.ttt",
+        "headless": true,
+        "joints": [0, 1, 2],
+        "episode_length": 200,
+        "log_dir": "/opt/results"
+      }
+    },
+    "callback": {
+      "name": "CustomCallback",
+      "module": "panda.callback",
+      "kwargs": {
+        "n_steps": 100000,
+        "save_path": "/opt/results/models"
+      }
     }
   }
 }

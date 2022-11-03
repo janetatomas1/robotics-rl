@@ -7,6 +7,6 @@ scene = pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'sce
 
 env = PandaEnv(scene=str(scene))
 
-model = TD3(env=env, policy="MlpPolicy")
+model = TD3(env=env,
+            policy="MlpPolicy",)
 model.learn(total_timesteps=100000)
-
