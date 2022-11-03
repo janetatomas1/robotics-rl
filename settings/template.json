@@ -3,8 +3,8 @@
     "name": "thesis-image"
   },
   "volume": {
-    "path": "/opt/results",
-    "host_path_prefix": "/opt/results"
+    "path": "/home/janeta1/results",
+    "host_path_prefix": "/home/janeta1/results"
   },
   "container": {
     "name": "thesis-container3"
