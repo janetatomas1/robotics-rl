@@ -5,6 +5,7 @@ import json
 import importlib
 from logger import Logger
 
+
 def main():
     stable_baselines3 = importlib.import_module("stable_baselines3")
     settings = json.loads(os.environ["settings"])

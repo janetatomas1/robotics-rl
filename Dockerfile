@@ -36,6 +36,8 @@ COPY requirements requirements
 RUN . venv/bin/activate && pip install -r requirements/dev.txt
 RUN . venv/bin/activate && pip install git+https://github.com/stepjam/PyRep.git
 
+RUN mkdir /opt/results
+
 COPY . .
 
 ENTRYPOINT ["bash", "run.sh"]
