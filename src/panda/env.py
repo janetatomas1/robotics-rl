@@ -8,8 +8,8 @@ import torch
 
 
 class PandaEnv(Env):
-    def __init__(self, scene, logger_class, threshold=0.3, joints=None, episode_length=100,
-                 headless=False, reset_actions=10, log_dir=None, remote=False):
+    def __init__(self, scene, threshold=0.3, joints=None, episode_length=100,
+                 headless=False, reset_actions=10, log_dir=None, logger_class=None):
         self.robot = None
         self.target = None
         self.reset_actions = reset_actions
@@ -20,9 +20,6 @@ class PandaEnv(Env):
         self.steps = 0
         self.scene = scene
         self.pyrep = PyRep()
-
-        if remote:
-            torch.set_num_threads(1)
 
         self.pyrep.launch(scene_file=self.scene, headless=headless)
         self.restart_simulation()
@@ -44,7 +41,10 @@ class PandaEnv(Env):
         )
         self.timestep = self.pyrep.get_simulation_timestep()
 
-        self.logger = logger_class("{}/values.txt".format(self.log_dir))
+        if logger_class is not None:
+            self.logger = logger_class("{}/values.txt".format(self.log_dir))
+        else:
+            self.logger = None
 
     def restart_simulation(self):
         self.pyrep.stop()
@@ -115,7 +115,8 @@ class PandaEnv(Env):
         close = self._is_close()
         reward = self._reward()
 
-        self.logger.step(reward, done, close)
+        if self.logger is not None:
+            self.logger.step(reward, done, close)
 
         return self._get_state(), reward, done, self._info()
 

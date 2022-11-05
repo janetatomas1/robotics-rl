@@ -9,11 +9,24 @@ from datetime import datetime
 
 def main():
     stable_baselines3 = importlib.import_module("stable_baselines3")
+
+    torch = importlib.import_module("torch")
+    nn = torch.nn
+
+    git = importlib.import_module("git")
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
+
     settings = json.loads(os.environ["settings"])
-    remote = settings.get("remote", False)
+    remote = settings.get("remote", True)
+
     settings["details"] = {
         "timestamp": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+        "sha": sha,
     }
+
+    if remote:
+        torch.set_num_threads(2)
 
     with open("/opt/results/settings.json", "w") as json_file:
         json.dump(settings, fp=json_file, indent=2)
@@ -24,13 +37,17 @@ def main():
     algorithm_learn_kwargs = algorithm_settings["learn_kwargs"]
     algorithm_class = getattr(stable_baselines3, algorithm_name)
 
+    policy_kwargs = algorithm_kwargs["policy_kwargs"]
+    policy_kwargs["activation_fn"] = nn.Tanh
+    algorithm_kwargs["policy_kwargs"] = policy_kwargs
+
     rl_env_settings = settings["rl_env"]
     rl_env_module_name = rl_env_settings["module"]
     rl_env_name = rl_env_settings["name"]
     rl_env_kwargs = rl_env_settings["kwargs"]
     rl_env_module = importlib.import_module(rl_env_module_name)
     rl_env_class = getattr(rl_env_module, rl_env_name)
-    rl_env = rl_env_class(**rl_env_kwargs, logger_class=Logger, remote=remote)
+    rl_env = rl_env_class(**rl_env_kwargs, logger_class=Logger)
 
     callback_settings = settings["callback"]
     callback_module_name = callback_settings["module"]
