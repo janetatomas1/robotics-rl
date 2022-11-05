@@ -1,11 +1,8 @@
-
 import docker
 import json
 from json.decoder import JSONDecodeError
 import argparse
 import pathlib
-from datetime import datetime
-import git
 import string
 import random
 
@@ -31,19 +28,11 @@ def main(settings):
         "settings": internal_settings,
     }
 
-    client.containers.run(image=image.id, detach=True, name=container_name,
-                          volumes={volume_host_path: {"bind": volume_path, "mode": "rw"}},
-                          environment=environment)
+    container = client.containers.run(image=image.id, detach=True, name=container_name,
+                                      volumes={volume_host_path: {"bind": volume_path, "mode": "rw"}},
+                                      environment=environment)
 
-    repository = git.Repo()
-    settings["details"] = {
-        "timestamp": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
-        "commit_id": repository.head.object.hexsha,
-        "branch": repository.active_branch.name,
-    }
-
-    with open("{}/settings.json".format(volume_host_path), "w") as json_file:
-        json.dump(settings, fp=json_file, indent=2)
+    print(container.id)
 
 
 if __name__ == "__main__":

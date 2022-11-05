@@ -4,11 +4,12 @@ from pyrep import PyRep
 from pyrep.robots.arms.panda import Panda
 from pyrep.objects.shape import Shape
 import numpy as np
+import torch
 
 
 class PandaEnv(Env):
     def __init__(self, scene, logger_class, threshold=0.3, joints=None, episode_length=100,
-                 headless=False, reset_actions=10, log_dir=None):
+                 headless=False, reset_actions=10, log_dir=None, remote=False):
         self.robot = None
         self.target = None
         self.reset_actions = reset_actions
@@ -19,6 +20,10 @@ class PandaEnv(Env):
         self.steps = 0
         self.scene = scene
         self.pyrep = PyRep()
+
+        if remote:
+            torch.set_num_threads(1)
+
         self.pyrep.launch(scene_file=self.scene, headless=headless)
         self.restart_simulation()
         self.joints = joints if joints is not None \

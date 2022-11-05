@@ -4,16 +4,19 @@ import os
 import json
 import importlib
 from logger import Logger
-import torch
+from datetime import datetime
 
 
 def main():
     stable_baselines3 = importlib.import_module("stable_baselines3")
     settings = json.loads(os.environ["settings"])
     remote = settings.get("remote", False)
+    settings["details"] = {
+        "timestamp": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+    }
 
-    if remote:
-        torch.set_num_threads(1)
+    with open("/opt/results/settings.json", "w") as json_file:
+        json.dump(settings, fp=json_file, indent=2)
 
     algorithm_settings = settings["algorithm"]
     algorithm_name = algorithm_settings["name"]
@@ -27,7 +30,7 @@ def main():
     rl_env_kwargs = rl_env_settings["kwargs"]
     rl_env_module = importlib.import_module(rl_env_module_name)
     rl_env_class = getattr(rl_env_module, rl_env_name)
-    rl_env = rl_env_class(**rl_env_kwargs, logger_class=Logger)
+    rl_env = rl_env_class(**rl_env_kwargs, logger_class=Logger, remote=remote)
 
     callback_settings = settings["callback"]
     callback_module_name = callback_settings["module"]
