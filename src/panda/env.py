@@ -113,7 +113,7 @@ class PandaEnv(Env):
 
         done = self._is_done()
         close = self._is_close()
-        reward = self._reward()
+        reward = self._reward(done, close)
 
         if self.logger is not None:
             self.logger.step(reward, done, close)
