@@ -1,56 +1,28 @@
 import docker
-import json
-from json.decoder import JSONDecodeError
-import argparse
-import pathlib
 import string
 import random
+import os
 
 
-def main(settings):
+def main():
     client = docker.DockerClient(version='auto')
 
-    image_settings = settings["image"]
-    image_name = image_settings.get("name", None)
-
-    image = client.images.get(image_name)
-
-    volume_settings = settings["volume"]
-    volume_path = volume_settings.get("path")
-    volume_host_path_prefix = volume_settings.get("host_path_prefix")
+    home_dir = os.environ["HOME"]
+    volume_host_path_prefix = "{}/resuls".format(home_dir)
     container_name = ''.join(random.sample(string.ascii_lowercase + string.digits, 20))
 
     volume_host_path = "{}/{}".format(volume_host_path_prefix, container_name)
 
-    internal_settings = json.dumps(settings.get("settings"))
     environment = {
         "VENV": "/opt/robotics-rl/venv/lib/python3.10/site-packages/",
-        "settings": internal_settings,
     }
 
-    container = client.containers.run(image=image.id, detach=True, name=container_name,
-                                      volumes={volume_host_path: {"bind": volume_path, "mode": "rw"}},
+    container = client.containers.run(image="thesis-image", detach=True, name=container_name,
+                                      volumes={volume_host_path: {"bind": "/opt/results/", "mode": "rw"}},
                                       environment=environment)
 
     print(container.id)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--settings', default='settings/template.json',
-                        help='JSON file containing pipeline settings value')
-
-    args = parser.parse_args()
-
-    settings_path = pathlib.Path(args.settings)
-    if not settings_path.exists():
-        raise Exception("settings file not found: {}".format(settings_path))
-
-    try:
-        settings_file = open(settings_path)
-        settings = json.load(settings_file)
-        settings_file.close()
-    except JSONDecodeError as e:
-        raise Exception("Unable to parse settings file: {}".format(settings_path))
-
-    main(settings)
+    main()

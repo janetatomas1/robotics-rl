@@ -1,10 +1,8 @@
 
 import sys
 import os
-import json
 import importlib
 from logger import Logger
-from datetime import datetime
 
 
 def main():
@@ -12,53 +10,43 @@ def main():
 
     torch = importlib.import_module("torch")
     nn = torch.nn
+    activation_fn = nn.Tanh
 
-    git = importlib.import_module("git")
-    repo = git.Repo(search_parent_directories=True)
-    sha = repo.head.object.hexsha
+    torch.set_num_threads(2)
 
-    settings = json.loads(os.environ["settings"])
-    remote = settings.get("remote", True)
-
-    settings["details"] = {
-        "timestamp": datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
-        "sha": sha,
+    env_class = importlib.import_module("panda.env").PandaEnv
+    env_kwargs = {
+        "scene": "/opt/robotics-rl/scenes/scene_panda.ttt",
+        "headless": True,
+        "joints": [0, 1, 2],
+        "episode_length": 50,
+        "log_dir": "/opt/results",
+        "logger_class": Logger,
     }
+    env = env_class(**env_kwargs)
 
-    if remote:
-        torch.set_num_threads(2)
-
-    with open("/opt/results/settings.json", "w") as json_file:
-        json.dump(settings, fp=json_file, indent=2)
-
-    algorithm_settings = settings["algorithm"]
-    algorithm_name = algorithm_settings["name"]
-    algorithm_kwargs = algorithm_settings["kwargs"]
-    algorithm_learn_kwargs = algorithm_settings["learn_kwargs"]
-    algorithm_class = getattr(stable_baselines3, algorithm_name)
-
-    policy_kwargs = algorithm_kwargs["policy_kwargs"]
-    policy_kwargs["activation_fn"] = nn.Tanh
-    algorithm_kwargs["policy_kwargs"] = policy_kwargs
-
-    rl_env_settings = settings["rl_env"]
-    rl_env_module_name = rl_env_settings["module"]
-    rl_env_name = rl_env_settings["name"]
-    rl_env_kwargs = rl_env_settings["kwargs"]
-    rl_env_module = importlib.import_module(rl_env_module_name)
-    rl_env_class = getattr(rl_env_module, rl_env_name)
-    rl_env = rl_env_class(**rl_env_kwargs, logger_class=Logger)
-
-    callback_settings = settings["callback"]
-    callback_module_name = callback_settings["module"]
-    callback_name = callback_settings["name"]
-    callback_module = importlib.import_module(callback_module_name)
-    callback_class = getattr(callback_module, callback_name)
-    callback_kwargs = callback_settings["kwargs"]
+    callback_class = importlib.import_module("panda.callback").CustomCallback
+    callback_kwargs = {
+        "n_steps": 100000,
+        "save_path": "/opt/results/models"
+    }
     callback = callback_class(**callback_kwargs)
 
-    algorithm = algorithm_class(policy="MlpPolicy", env=rl_env, **algorithm_kwargs)
-    algorithm.learn(**algorithm_learn_kwargs, callback=callback)
+    algorithm_class = stable_baselines3.TD3
+    algorithm_kwargs = {
+        "policy": "MlpPolicy",
+        "policy_kwargs": {
+            "net_arch": [100, 100],
+            "activation_fn": activation_fn,
+        },
+    }
+
+    learn_kwargs = {
+        "total_timesteps": 10000000
+    }
+
+    algorithm = algorithm_class(env=env, **algorithm_kwargs)
+    algorithm.learn(**learn_kwargs, callback=callback)
 
 
 if __name__ == "__main__":

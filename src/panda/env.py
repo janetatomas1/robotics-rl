@@ -122,3 +122,5 @@ class PandaEnv(Env):
 
     def close(self):
         self.logger.stop()
+        self.pyrep.stop()
+        self.pyrep.shutdown()
