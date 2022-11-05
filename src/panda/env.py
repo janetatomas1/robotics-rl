@@ -87,14 +87,12 @@ class PandaEnv(Env):
                     <= self.threshold)
 
     def _reward(self, done=False, close=False):
-        if not done:
-            return -np.linalg.norm(self.target.get_position() - self.robot.get_tip().get_position())
-
-        if done and not close:
-            return -100
-
         if close:
             return 100
+        elif not done:
+            return -np.linalg.norm(self.target.get_position() - self.robot.get_tip().get_position())
+
+        return -100
 
     def _is_done(self):
         return self._is_close() or self.steps >= self.episode_length
