@@ -10,6 +10,7 @@
     "name": "thesis-container3"
   },
   "settings": {
+    "remote": true,
     "algorithm": {
       "name": "TD3",
       "kwargs": {

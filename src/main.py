@@ -4,11 +4,16 @@ import os
 import json
 import importlib
 from logger import Logger
+import torch
 
 
 def main():
     stable_baselines3 = importlib.import_module("stable_baselines3")
     settings = json.loads(os.environ["settings"])
+    remote = settings.get("remote", False)
+
+    if remote:
+        torch.set_num_threads(1)
 
     algorithm_settings = settings["algorithm"]
     algorithm_name = algorithm_settings["name"]
