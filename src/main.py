@@ -4,9 +4,17 @@ import os
 import importlib
 from logger import Logger
 
+joints = [0, 1, 2]
+
 
 def main():
     stable_baselines3 = importlib.import_module("stable_baselines3")
+    noise_class = stable_baselines3.noise.NormalActionNoise
+
+    np = importlib.import_module("numpy")
+
+    n_actions = len(joints)
+    action_noise = noise_class(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
 
     torch = importlib.import_module("torch")
     nn = torch.nn
@@ -14,14 +22,17 @@ def main():
 
     torch.set_num_threads(2)
 
-    env_class = importlib.import_module("panda.env").PandaEnv
+    env_module = importlib.import_module("panda.env")
+    env_reward_fn = env_module.shape_reward
+    env_class = env_module.PandaEnv
     env_kwargs = {
         "scene": "/opt/robotics-rl/scenes/scene_panda.ttt",
         "headless": True,
-        "joints": [0, 1, 2],
+        "joints": joints,
         "episode_length": 50,
         "log_dir": "/opt/results",
         "logger_class": Logger,
+        "reward_fn": env_reward_fn,
     }
     env = env_class(**env_kwargs)
 
@@ -39,13 +50,14 @@ def main():
             "net_arch": [100, 100],
             "activation_fn": activation_fn,
         },
+        "action_noise": action_noise,
     }
 
     learn_kwargs = {
         "total_timesteps": 10000000
     }
 
-    algorithm = algorithm_class(env=env, **algorithm_kwargs)
+    algorithm = algorithm_class(env=env, action_noise=action_noise, **algorithm_kwargs)
     algorithm.learn(**learn_kwargs, callback=callback)
 
 
