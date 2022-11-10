@@ -6,17 +6,18 @@ import torch
 import torch.nn as nn
 import pathlib
 
+
 from src.logger import Logger
 from src.callback import CustomCallback
 from .env import PandaEnv, sparse_reward
 
 
-def main():
+def train():
     joints = [0, 1, 2, 3, 4, 5, 6]
     n_actions = len(joints)
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
 
-    torch.set_num_threads(2)
+    torch.set_num_threads(1)
 
     scene = pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'scene_panda.ttt')
 
@@ -32,7 +33,7 @@ def main():
     env = PandaEnv(**env_kwargs)
 
     callback_kwargs = {
-        "n_steps": 100000,
+        "n_steps": 10000,
         "save_path": "/opt/results/models"
     }
     callback = CustomCallback(**callback_kwargs)
@@ -55,6 +56,8 @@ def main():
     algorithm = TD3(**algorithm_kwargs)
     algorithm.learn(**learn_kwargs)
 
+    return algorithm
+
 
 if __name__ == "__main__":
-    main()
+    train()

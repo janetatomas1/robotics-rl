@@ -20,7 +20,6 @@ def main():
     container = client.containers.run(image="thesis-image", detach=True, name=container_name,
                                       volumes={volume_host_path: {"bind": "/opt/results/", "mode": "rw"}},
                                       environment=environment)
-
     print(container.id)
 
 

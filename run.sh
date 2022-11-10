@@ -1,5 +1,5 @@
 
-command="python3 src/main.py"
+command="python3 -m src.main"
 
 echo xvfb-run --server-args "-ac -screen 0, 1024x1024x24" ${command} "$@"
 
