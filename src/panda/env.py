@@ -21,8 +21,16 @@ def sparse_reward(**kwargs):
 class PandaEnv(Env):
     INFO = {}
 
-    def __init__(self, scene, threshold=0.3, joints=None, episode_length=100,
-                 headless=False, reset_actions=10, log_dir=None, logger_class=None, reward_fn=sparse_reward):
+    def __init__(self, scene,
+                 threshold=0.3,
+                 joints=None,
+                 episode_length=100,
+                 headless=False,
+                 reset_actions=10,
+                 log_dir=None,
+                 logger_class=None,
+                 reward_fn=sparse_reward,
+                 count_steps=True):
         self.robot = None
         self.target = None
         self.reset_actions = reset_actions
@@ -32,6 +40,7 @@ class PandaEnv(Env):
         self.episode_length = episode_length
         self.scene = scene
         self.reward = reward_fn
+        self.count_steps = count_steps
         self.steps = 0
         self.pyrep = PyRep()
 
@@ -106,7 +115,8 @@ class PandaEnv(Env):
         return self.is_close() or self.steps >= self.episode_length
 
     def step(self, action):
-        self.steps += 1
+        if self.count_steps:
+            self.steps += 1
 
         self.move(action)
 
