@@ -4,12 +4,6 @@ from pyrep import PyRep
 from pyrep.robots.arms.panda import Panda
 from pyrep.objects.shape import Shape
 import numpy as np
-import math
-
-
-class Constants:
-    a = math.pow(2, -10)
-    b = -10
 
 
 def sparse_reward(**kwargs):
@@ -22,25 +16,6 @@ def sparse_reward(**kwargs):
         return -1
 
     return -2
-
-
-def f(x):
-    if x < Constants.a:
-        return Constants.b
-
-    return math.log2(x)
-
-
-def shaped_reward(**kwargs):
-    env = kwargs["env"]
-    state = env._get_state()
-    current_pos = env.robot.get_tip().get_position()
-    target_pos = state[:3]
-    joint_values = state[3:]
-    joint_low = env.low
-    joint_high = env.high
-    minimum = np.concatenate([joint_values - joint_low, joint_high - joint_values]).min()
-    return f(minimum) + np.linalg.norm(current_pos - target_pos)
 
 
 class PandaEnv(Env):
@@ -150,6 +125,7 @@ class PandaEnv(Env):
         return self._get_state(), reward, done, self._info()
 
     def close(self):
-        self.logger.stop()
+        if self.logger is not None:
+            self.logger.stop()
         self.pyrep.stop()
         self.pyrep.shutdown()

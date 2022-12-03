@@ -10,7 +10,7 @@ if __name__ == "__main__":
     git = importlib.import_module("git")
 
     with open("/opt/results/git.txt", 'w') as f:
-        repo = git.Repo()
+        repo = git.Repo(search_parent_directories=True)
         f.write("branch: {}\n".format(repo.active_branch.name))
         f.write("commit: {}\n".format(repo.head.object.hexsha))
 
