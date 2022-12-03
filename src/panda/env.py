@@ -19,6 +19,8 @@ def sparse_reward(**kwargs):
 
 
 class PandaEnv(Env):
+    INFO = {}
+
     def __init__(self, scene, threshold=0.3, joints=None, episode_length=100,
                  headless=False, reset_actions=10, log_dir=None, logger_class=None, reward_fn=sparse_reward):
         self.robot = None
@@ -85,32 +87,31 @@ class PandaEnv(Env):
             action = self.action_space.sample()
             self.move(action)
 
-        return self._get_state()
+        return self.get_state()
 
     def render(self, mode="human"):
         pass
 
-    def _get_state(self):
-        return np.concatenate([self.target.get_position(),
-                               [self.robot.get_joint_positions()[j] for j in self.joints]])
+    def get_joint_values(self):
+        return np.array([self.robot.get_joint_positions()[j] for j in self.joints])
 
-    def _is_close(self):
+    def get_state(self):
+        return np.concatenate([self.target.get_position(), self.get_joint_values()])
+
+    def is_close(self):
         return bool(np.linalg.norm(self.target.get_position() - self.robot.get_tip().get_position())
                     <= self.threshold)
 
-    def _is_done(self):
-        return self._is_close() or self.steps >= self.episode_length
-
-    def _info(self):
-        return {}
+    def is_done(self):
+        return self.is_close() or self.steps >= self.episode_length
 
     def step(self, action):
         self.steps += 1
 
         self.move(action)
 
-        done = self._is_done()
-        close = self._is_close()
+        done = self.is_done()
+        close = self.is_close()
 
         reward_kwargs = {
             "env": self,
@@ -122,7 +123,7 @@ class PandaEnv(Env):
         if self.logger is not None:
             self.logger.step(reward, done, close)
 
-        return self._get_state(), reward, done, self._info()
+        return self.get_state(), reward, done, self.INFO
 
     def close(self):
         if self.logger is not None:
