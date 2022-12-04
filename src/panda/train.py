@@ -9,7 +9,11 @@ import pathlib
 
 from src.logger import Logger
 from src.callback import CustomCallback
-from .env import PandaEnv, sparse_reward
+from .env import (
+    PandaEnv,
+    sparse_reward,
+    punish_long_path_reward,
+)
 
 
 def train():
@@ -28,7 +32,7 @@ def train():
         "episode_length": 50,
         "log_dir": "/opt/results",
         "logger_class": Logger,
-        "reward_fn": sparse_reward
+        "reward_fn": punish_long_path_reward,
     }
     env = PandaEnv(**env_kwargs)
 
