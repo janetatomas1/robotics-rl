@@ -18,6 +18,30 @@ def sparse_reward(**kwargs):
     return -2
 
 
+def path_cost(path):
+    if len(path) <= 1:
+        return 0
+
+    cost = 0
+    for i in range(1, len(path)):
+        cost += np.linalg.norm(path[i-1][0] - path[i][0])
+
+    return cost
+
+
+def punish_long_path_reward(**kwargs):
+    done = kwargs["done"]
+    close = kwargs["close"]
+
+    if close:
+        path = kwargs["path"]
+        return 20 - path_cost(path)
+    elif not done:
+        return -1
+
+    return -2
+
+
 class PandaEnv(Env):
     INFO = {}
 
@@ -30,7 +54,7 @@ class PandaEnv(Env):
                  log_dir=None,
                  logger_class=None,
                  reward_fn=sparse_reward,
-                 count_steps=True):
+                 training=True):
         self.robot = None
         self.target = None
         self.reset_actions = reset_actions
@@ -40,7 +64,7 @@ class PandaEnv(Env):
         self.episode_length = episode_length
         self.scene = scene
         self.reward = reward_fn
-        self.count_steps = count_steps
+        self.training = training
         self.steps = 0
         self.pyrep = PyRep()
 
@@ -68,6 +92,7 @@ class PandaEnv(Env):
             self.logger = logger_class("{}/values.txt".format(self.log_dir))
         else:
             self.logger = None
+        self.path = list()
 
     def restart_simulation(self):
         self.pyrep.stop()
@@ -88,6 +113,8 @@ class PandaEnv(Env):
     def reset(self):
         self.restart_simulation()
         self.steps = 0
+        self.move(np.zeros((len(self.joints),)))
+        self.path.clear()
 
         state = self.observation_space.sample()
         self.target.set_position(state[:3])
@@ -115,18 +142,24 @@ class PandaEnv(Env):
         return self.is_close() or self.steps >= self.episode_length
 
     def step(self, action):
-        if self.count_steps:
+        if self.training:
             self.steps += 1
+
+        self.path.append((self.get_joint_values(), self.robot.get_tip().get_position()))
 
         self.move(action)
 
         done = self.is_done()
         close = self.is_close()
 
+        if done:
+            self.path.append((self.get_joint_values(), self.robot.get_tip().get_position()))
+
         reward_kwargs = {
             "env": self,
             "done": done,
             "close": close,
+            "path": self.path,
         }
         reward = self.reward(**reward_kwargs)
 
