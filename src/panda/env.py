@@ -77,7 +77,7 @@ class PandaEnv(Env):
         self.target = Shape('target')
 
         self.robot.set_control_loop_enabled(False)
-        self.robot.set_motor_locked_at_zero_velocity(True)
+        self.robot.set_motor_locked_at_zero_velocity(False)
 
     def move(self, action):
         for j, v in zip(self.joints, action):
