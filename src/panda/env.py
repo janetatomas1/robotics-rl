@@ -49,7 +49,7 @@ def path_cost2(path, target_position, threshold):
     cost = 0
     for i in range(1, len(path)):
         if np.linalg.norm(path[i][1] - target_position) <= threshold:
-            cost += np.linalg.norm(path[i - 1][0] - path[i][0]) * 5
+            cost += np.linalg.norm(path[i - 1][0] - path[i][0]) * 3
         else:
             cost += np.linalg.norm(path[i - 1][0] - path[i][0])
 
@@ -80,6 +80,8 @@ class PandaEnv(Env):
                  short_distance_threshold=0.5,
                  joints=None,
                  episode_length=100,
+                 target_low=None,
+                 target_high=None,
                  headless=False,
                  reset_actions=10,
                  log_dir=None,
@@ -111,8 +113,8 @@ class PandaEnv(Env):
         self.high = np.array([joint_intervals[j][1] for j in self.joints])
 
         self.observation_space = spaces.Box(
-            low=np.concatenate([[0.8, -0.2, 0.5], self.low]),
-            high=np.concatenate([[1.0, 0.2, 1.4], self.high]),
+            low=np.concatenate([[0.8, -0.2, 0.5] if target_low is None else target_low, self.low]),
+            high=np.concatenate([[1.0, 0.2, 1.4] if target_high is None else target_high, self.high]),
             dtype=np.float64,
         )
         self.action_space = spaces.Box(
