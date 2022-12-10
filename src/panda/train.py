@@ -13,6 +13,7 @@ from .env import (
     PandaEnv,
     sparse_reward,
     punish_long_path_reward,
+    punish_long_path_reward2,
 )
 
 
@@ -32,7 +33,7 @@ def train():
         "episode_length": 50,
         "log_dir": "/opt/results",
         "logger_class": Logger,
-        "reward_fn": punish_long_path_reward,
+        "reward_fn": punish_long_path_reward2,
     }
     env = PandaEnv(**env_kwargs)
 

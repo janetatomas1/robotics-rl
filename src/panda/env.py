@@ -42,11 +42,42 @@ def punish_long_path_reward(**kwargs):
     return -2
 
 
+def path_cost2(path, target_position, threshold):
+    if len(path) <= 1:
+        return 0
+
+    cost = 0
+    for i in range(1, len(path)):
+        if np.linalg.norm(path[i][1] - target_position) <= threshold:
+            cost += np.linalg.norm(path[i - 1][0] - path[i][0]) * 5
+        else:
+            cost += np.linalg.norm(path[i - 1][0] - path[i][0])
+
+    return cost
+
+
+def punish_long_path_reward2(**kwargs):
+    done = kwargs["done"]
+    close = kwargs["close"]
+    target = kwargs["target"]
+    threshold = kwargs["short_distance_threshold"]
+
+    if close:
+        path = kwargs["path"]
+        return 20 - path_cost2(path, target.get_position(), threshold)
+    elif not done:
+        return -1
+
+    return -2
+
+
 class PandaEnv(Env):
     INFO = {}
 
-    def __init__(self, scene,
+    def __init__(self,
+                 scene,
                  threshold=0.1,
+                 short_distance_threshold=0.5,
                  joints=None,
                  episode_length=100,
                  headless=False,
@@ -59,6 +90,7 @@ class PandaEnv(Env):
         self.target = None
         self.reset_actions = reset_actions
         self.threshold = threshold
+        self.short_distance_threshold = short_distance_threshold
         self.headless = headless
         self.log_dir = log_dir
         self.episode_length = episode_length
@@ -156,6 +188,8 @@ class PandaEnv(Env):
             "done": done,
             "close": close,
             "path": self.path,
+            "target": self.target,
+            "short_distance_threshold": self.short_distance_threshold,
         }
         reward = self.reward(**reward_kwargs)
 
