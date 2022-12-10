@@ -46,7 +46,7 @@ class PandaEnv(Env):
     INFO = {}
 
     def __init__(self, scene,
-                 threshold=0.3,
+                 threshold=0.1,
                  joints=None,
                  episode_length=100,
                  headless=False,
@@ -67,8 +67,9 @@ class PandaEnv(Env):
         self.training = training
         self.steps = 0
         self.pyrep = PyRep()
-
         self.pyrep.launch(scene_file=self.scene, headless=headless)
+        self.robot = Panda()
+        self.target = Shape('target')
         self.restart_simulation()
         self.joints = joints if joints is not None \
             else [i for i in range(len(self.robot.joints))]
@@ -97,9 +98,6 @@ class PandaEnv(Env):
     def restart_simulation(self):
         self.pyrep.stop()
         self.pyrep.start()
-
-        self.robot = Panda()
-        self.target = Shape('target')
 
         self.robot.set_control_loop_enabled(False)
         self.robot.set_motor_locked_at_zero_velocity(False)
@@ -146,9 +144,7 @@ class PandaEnv(Env):
             self.steps += 1
 
         self.path.append((self.get_joint_values(), self.robot.get_tip().get_position()))
-
         self.move(action)
-
         done = self.is_done()
         close = self.is_close()
 
