@@ -14,7 +14,7 @@ if __name__ == "__main__":
         f.write("branch: {}\n".format(repo.active_branch.name))
         f.write("commit: {}\n".format(repo.head.object.hexsha))
 
-    train = importlib.import_module("src.panda").train
+    train = importlib.import_module("src.arm").train
     logger_class = importlib.import_module("src.logger").Logger
     callback_class = importlib.import_module("src.callback").CustomCallback
 
