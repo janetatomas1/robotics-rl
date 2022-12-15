@@ -1,7 +1,13 @@
 
-from src.arm.env import (
+from .envs import (
+    ArmEnv,
     PandaEnv,
-    sparse_reward,
+    MicoEnv,
+    JacoEnv,
+    UR3Env,
+    UR5Env,
+    UR10Env,
+    LBRIwaa7R800Env,
+    LBRIwaa14R820Env,
 )
-
 from src.arm.train import train

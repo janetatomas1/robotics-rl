@@ -8,8 +8,11 @@ class Logger:
         self.file = open(self.path, "w")
         self.writer = csv.writer(self.file)
 
-    def step(self, reward, done, success):
+    def step(self, reward, done, success, info=None):
         self.buffer.append(reward)
+
+        if info is not None and len(info) > 0:
+            self.buffer.append(info)
 
         if done:
             self.buffer.insert(0, int(success))

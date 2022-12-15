@@ -9,36 +9,40 @@ import pathlib
 
 from src.logger import Logger
 from src.callback import CustomCallback
-from .env import (
+from .envs import (
     PandaEnv,
-    sparse_reward,
-    punish_long_path_reward,
-    punish_long_path_reward2,
+    JacoEnv,
+    MicoEnv,
+    UR3Env,
+    UR5Env,
+    UR10Env,
+    LBRIwaa7R800Env,
+    LBRIwaa14R820Env,
 )
 
 
 def train():
-    joints = [0, 1, 2, 3, 4, 5, 6]
-    n_actions = len(joints)
-    action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
-
     torch.set_num_threads(1)
 
     scene = pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'scene_panda.ttt')
 
     env_kwargs = {
         "scene": str(scene),
-        "headless": True,
-        "joints": joints,
+        "headless": False,
         "episode_length": 50,
         "log_dir": "/opt/results",
         "logger_class": Logger,
-        "reward_fn": punish_long_path_reward2,
+        "reward_fn": "sparse_reward",
+        "target_low": [0.7, -0.5, 0.9],
+        "target_high": [1.3, 0.5, 1.4],
+        "reset_actions": 10,
     }
     env = PandaEnv(**env_kwargs)
+    n_actions = len(env.get_joints())
+    action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
 
     callback_kwargs = {
-        "n_steps": 10000,
+        "n_steps": 200000,
         "save_path": "/opt/results/models"
     }
     callback = CustomCallback(**callback_kwargs)
@@ -55,7 +59,7 @@ def train():
 
     learn_kwargs = {
         "callback": callback,
-        "total_timesteps": 2000000
+        "total_timesteps": 20000000
     }
 
     algorithm = TD3(**algorithm_kwargs)
@@ -63,6 +67,3 @@ def train():
 
     return algorithm
 
-
-if __name__ == "__main__":
-    train()
