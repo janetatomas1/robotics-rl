@@ -28,7 +28,7 @@ def train():
 
     env_kwargs = {
         "scene": str(scene),
-        "headless": False,
+        "headless": True,
         "episode_length": 50,
         "log_dir": "/opt/results",
         "logger_class": Logger,
