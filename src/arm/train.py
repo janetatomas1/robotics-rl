@@ -33,8 +33,8 @@ def train():
         "log_dir": "/opt/results",
         "logger_class": Logger,
         "reward_fn": "sparse_reward",
-        "target_low": [0.7, -0.5, 0.9],
-        "target_high": [1.3, 0.5, 1.4],
+        "target_low": [0.8, -0.2, 1.0],
+        "target_high": [1.0, 0.2, 1.4],
         "reset_actions": 10,
     }
     env = PandaEnv(**env_kwargs)
