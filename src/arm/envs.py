@@ -121,9 +121,9 @@ class ArmEnv(RobotEnv):
 
     def reward_boost(self):
         if self._with_quaternion:
-            return self.BOOSTED_REWARD - self.path_cost()
+            return self.BOOSTED_REWARD - self.path_cost() - self.quaternion_distance() * 3
 
-        return self.BOOSTED_REWARD - self.path_cost() - self.quaternion_distance() * 3
+        return self.BOOSTED_REWARD - self.path_cost()
 
     def info(self):
         if self._with_quaternion and self.is_done():
