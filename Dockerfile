@@ -38,4 +38,4 @@ RUN . venv/bin/activate && pip install git+https://github.com/stepjam/PyRep.git
 
 COPY . .
 
-ENTRYPOINT ["bash", "run.sh"]
+ENTRYPOINT ["bash", "scripts/run.sh"]
