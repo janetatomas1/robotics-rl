@@ -114,9 +114,6 @@ class ArmEnv(RobotEnv):
         return np.linalg.norm(self._quaternion - self.get_quaternion())
 
     def is_close(self):
-        if self._with_quaternion:
-            return bool(self.distance() <= self._threshold) and bool(self.quaternion_distance() < self._quaternion_threshold)
-
         return bool(self.distance() <= self._threshold)
 
     def reward_boost(self):
