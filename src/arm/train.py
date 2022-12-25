@@ -42,7 +42,7 @@ def train():
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
 
     callback_kwargs = {
-        "n_steps": 200000,
+        "n_steps": 20000,
         "save_path": "/opt/results/models"
     }
     callback = CustomCallback(**callback_kwargs)
