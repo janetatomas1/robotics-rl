@@ -8,13 +8,31 @@ import pathlib
 from .envs import PandaEnv
 
 
-def get_rl_path(env, model):
+def rl_path(env, model):
     obs = env.get_state()
     done = False
 
     while not done:
         action = model.predict(obs)
         obs, _, done, _ = env.step(action)
+
+
+def algo_path(env, algorithm):
+    env.clear_history()
+    target = env.get_target()
+    robot = env.get_robot()
+
+    path = robot.get_path(
+        position=target.get_position(),
+        quaternion=[0, 0, 1, 0],
+        distance_threshold=0.1,
+        trials=1000,
+        max_configs=1000,
+    )
+
+    done = False
+    env.update_history()
+
 
 
 def evaluate():

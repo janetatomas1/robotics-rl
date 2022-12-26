@@ -3,6 +3,7 @@ from gym import Env
 from pyrep import PyRep
 from pyrep.objects.shape import Shape
 import numpy as np
+import copy
 
 
 class RobotEnv(Env):
