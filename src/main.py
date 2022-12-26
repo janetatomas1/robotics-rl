@@ -15,8 +15,7 @@ if __name__ == "__main__":
         f.write("commit: {}\n".format(repo.head.object.hexsha))
 
     train = importlib.import_module("src.arm.train").train
-    logger_class = importlib.import_module("src.logger").Logger
-    callback_class = importlib.import_module("src.callback").CustomCallback
+    evaluate = importlib.import_module("src.arm.eval").evaluate
 
-    train()
-
+    # train()
+    evaluate()

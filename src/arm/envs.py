@@ -25,11 +25,12 @@ class ArmEnv(RobotEnv):
                  **kwargs):
         super().__init__(**kwargs)
         self._joints = joints if joints is not None else [i for i in range(len(self._robot.joints))]
-        self._reset_actions = reset_actions
+        self._nreset_actions = reset_actions
+        self._reset_actions = list()
         self._quaternion_threshold = quaternion_threshold
         self._with_quaternion = with_quaternion
         self._quaternion = np.zeros((4,)) if self._with_quaternion else None
-
+        self._tip_path = list()
 
         _, joint_intervals = self._robot.get_joint_intervals()
 
@@ -65,8 +66,14 @@ class ArmEnv(RobotEnv):
             high=np.array([max_speed for _ in self._joints])
         )
 
-    def update_path(self):
+    def clear_history(self):
+        super().clear_history()
+        self._tip_path.clear()
+
+    def update_history(self):
+        super().update_history()
         self._path.append(self.get_joint_values())
+        self._tip_path.append(self.get_robot().get_tip().get_position())
 
     def move(self, action):
         for j, v in zip(self._joints, action):
@@ -74,7 +81,9 @@ class ArmEnv(RobotEnv):
 
         self._pyrep.step()
 
-    def reset_specific(self):
+    def reset(self):
+        super(RobotEnv).reset()
+        self._reset_actions.clear()
         self._robot.set_control_loop_enabled(False)
         self._robot.set_motor_locked_at_zero_velocity(False)
         state = self.observation_space.sample()
@@ -83,8 +92,9 @@ class ArmEnv(RobotEnv):
         if self._with_quaternion:
             self._quaternion = state[-4:]
 
-        for _ in range(self._reset_actions):
+        for _ in range(self._nreset_actions):
             action = self.action_space.sample()
+            self._reset_actions.append(action)
             self.move(action)
 
         self.move(np.zeros((len(self._joints),)))
@@ -128,6 +138,11 @@ class ArmEnv(RobotEnv):
 
         return {}
 
+    def get_reset_actions(self):
+        return self._reset_actions
+
+    def get_history(self):
+        return self._tip_path, super().get_history()
 
 class PandaEnv(ArmEnv):
     def __init__(self, **kwargs):
