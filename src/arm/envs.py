@@ -11,6 +11,7 @@ from pyrep.robots.arms.lbr_iiwa_7_r800 import LBRIwaa7R800
 from pyrep.robots.arms.lbr_iiwa_14_r820 import LBRIwaa14R820
 
 from src.robot_env import RobotEnv
+from src.utils import path_cost
 
 
 class ArmEnv(RobotEnv):
@@ -82,7 +83,7 @@ class ArmEnv(RobotEnv):
         self._pyrep.step()
 
     def reset(self):
-        super(RobotEnv).reset()
+        super().reset()
         self._reset_actions.clear()
         self._robot.set_control_loop_enabled(False)
         self._robot.set_motor_locked_at_zero_velocity(False)
@@ -98,6 +99,7 @@ class ArmEnv(RobotEnv):
             self.move(action)
 
         self.move(np.zeros((len(self._joints),)))
+        return self.get_state()
 
     def get_joint_values(self):
         return np.array([self._robot.get_joint_positions()[j] for j in self._joints])
@@ -128,9 +130,9 @@ class ArmEnv(RobotEnv):
 
     def reward_boost(self):
         if self._with_quaternion:
-            return self.BOOSTED_REWARD - self.path_cost() - self.quaternion_distance() * 3
+            return self.BOOSTED_REWARD - path_cost(self.get_path()) - self.quaternion_distance() * 3
 
-        return self.BOOSTED_REWARD - self.path_cost()
+        return self.BOOSTED_REWARD - path_cost(self.get_path())
 
     def info(self):
         if self._with_quaternion and self.is_done():
@@ -141,8 +143,9 @@ class ArmEnv(RobotEnv):
     def get_reset_actions(self):
         return self._reset_actions
 
-    def get_history(self):
-        return self._tip_path, super().get_history()
+    def get_tip_path(self):
+        return self._tip_path
+
 
 class PandaEnv(ArmEnv):
     def __init__(self, **kwargs):

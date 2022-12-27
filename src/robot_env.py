@@ -2,8 +2,9 @@
 from gym import Env
 from pyrep import PyRep
 from pyrep.objects.shape import Shape
-import numpy as np
-import copy
+
+from src.utils import path_cost
+from src.logger import BinaryLogger
 
 
 class RobotEnv(Env):
@@ -17,14 +18,14 @@ class RobotEnv(Env):
                  robot_class,
                  target_low,
                  target_high,
+                 log_file=None,
                  threshold=0.1,
                  episode_length=100,
                  headless=False,
-                 log_dir=None,
-                 logger_class=None,
+                 logger_class=BinaryLogger,
                  reward_fn='sparse_reward'):
         self._threshold = threshold
-        self._log_dir = log_dir
+        self._log_file = log_file
         self._episode_length = episode_length
         self._scene = scene
         self._steps = 0
@@ -40,10 +41,11 @@ class RobotEnv(Env):
         self._target = Shape('target')
         self.restart_simulation()
 
-        if logger_class is not None:
-            self.logger = logger_class("{}/values.txt".format(self._log_dir))
-        else:
-            self.logger = None
+        self._logger = logger_class()
+
+        if self._log_file is not None:
+            self._logger.open(self._log_file)
+
         self._path = list()
 
     def restart_simulation(self):
@@ -64,13 +66,6 @@ class RobotEnv(Env):
 
         return self.STEP_FAILURE_REWARD
 
-    def path_cost(self):
-        cost = 0
-        for i in range(1, len(self._path)):
-            cost += np.linalg.norm(self._path[i] - self._path[i-1])
-
-        return cost
-
     def boosted_sparse_reward(self):
         done = self.is_done()
         close = self.is_close()
@@ -83,7 +78,7 @@ class RobotEnv(Env):
         return self.STEP_FAILURE_REWARD
 
     def reward_boost(self):
-        return self.BOOSTED_REWARD - self.path_cost()
+        return self.BOOSTED_REWARD - path_cost(self._path)
 
     def reset_specific(self):
         pass
@@ -137,19 +132,27 @@ class RobotEnv(Env):
 
         self.update_history()
 
-        if self.logger is not None:
-            self.logger.step(reward, done, close, info)
+        if done and self._log_file is not None:
+            self.save_history(close=close, rewards=self._rewards, info={'info': info})
 
         return self.get_state(), reward, done, info
 
     def close(self):
-        if self.logger is not None:
-            self.logger.stop()
+        self._logger.close()
         self._pyrep.stop()
         self._pyrep.shutdown()
+
+    def save_history(self, **kwargs):
+        self._logger.save_history(**kwargs)
 
     def get_pyrep_instance(self):
         return self._pyrep
 
-    def get_history(self):
-        return self._path, self._rewards
+    def get_path(self):
+        return self._path
+
+    def get_rewards(self):
+        return self._rewards
+
+    def get_logger(self):
+        return self._logger

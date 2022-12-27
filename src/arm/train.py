@@ -7,7 +7,7 @@ import torch.nn as nn
 import pathlib
 
 
-from src.logger import Logger
+from src.logger import CSVLogger
 from src.callback import CustomCallback
 from .envs import (
     PandaEnv,
@@ -30,8 +30,8 @@ def train():
         "scene": str(scene),
         "headless": True,
         "episode_length": 50,
-        "log_dir": "/opt/results",
-        "logger_class": Logger,
+        "log_file": "/opt/results/values.csv",
+        "logger_class": CSVLogger,
         "reward_fn": "sparse_reward",
         "target_low": [0.8, -0.2, 1.0],
         "target_high": [1.0, 0.2, 1.4],
@@ -64,6 +64,3 @@ def train():
 
     algorithm = TD3(**algorithm_kwargs)
     algorithm.learn(**learn_kwargs)
-
-    return algorithm
-
