@@ -20,7 +20,7 @@ class RobotEnv(Env):
                  target_high,
                  log_file=None,
                  threshold=0.1,
-                 episode_length=100,
+                 episode_length=50,
                  headless=False,
                  logger_class=BinaryLogger,
                  reward_fn='sparse_reward'):

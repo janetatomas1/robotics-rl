@@ -50,6 +50,7 @@ def evaluate():
 
     env_kwargs = {
         "scene": str(scene),
+        "headless": True,
         "episode_length": 50,
         "reward_fn": "sparse_reward",
         "target_low": [0.8, -0.2, 1.0],

@@ -30,13 +30,14 @@ def train():
         "scene": str(scene),
         "headless": True,
         "episode_length": 50,
-        "log_file": "/opt/results/values.csv",
-        "logger_class": CSVLogger,
         "reward_fn": "sparse_reward",
         "target_low": [0.8, -0.2, 1.0],
         "target_high": [1.0, 0.2, 1.4],
         "reset_actions": 10,
+        "with_quaternion": False,
+        "logger_class": CSVLogger,
     }
+
     env = PandaEnv(**env_kwargs)
     n_actions = len(env.get_joints())
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
