@@ -30,7 +30,7 @@ def train():
         "scene": str(scene),
         "headless": True,
         "episode_length": 50,
-        "log_dir": "/opt/results/values.csv",
+        "log_file": "/opt/results/values.csv",
         "reward_fn": "sparse_reward",
         "target_low": [0.8, -0.2, 1.0],
         "target_high": [1.0, 0.2, 1.4],

@@ -114,6 +114,7 @@ class RobotEnv(Env):
 
     def clear_history(self):
         self._path.clear()
+        self._rewards.clear()
         self._steps = 0
 
     def update_history(self):
