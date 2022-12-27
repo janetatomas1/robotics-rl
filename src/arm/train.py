@@ -33,7 +33,7 @@ def train():
         "reward_fn": "sparse_reward",
         "target_low": [0.8, -0.2, 1.0],
         "target_high": [1.0, 0.2, 1.4],
-        "reset_actions": 10,
+        "reset_actions": 5,
         "with_quaternion": False,
         "logger_class": CSVLogger,
     }
@@ -60,7 +60,7 @@ def train():
 
     learn_kwargs = {
         "callback": callback,
-        "total_timesteps": 100000000
+        "total_timesteps": 10000000
     }
 
     algorithm = TD3(**algorithm_kwargs)
