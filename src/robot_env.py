@@ -134,7 +134,10 @@ class RobotEnv(Env):
         self.update_history()
 
         if done and self._log_file is not None:
-            self.save_history(close=close, rewards=self._rewards, info={'info': info})
+            if len(info) > 0:
+                self.save_history(close=close, rewards=self._rewards, info={'info': info})
+            else:
+                self.save_history(close=close, rewards=self._rewards)
 
         return self.get_state(), reward, done, info
 
