@@ -60,7 +60,7 @@ def train():
 
     learn_kwargs = {
         "callback": callback,
-        "total_timesteps": 10000000
+        "total_timesteps": 1000000
     }
 
     algorithm = TD3(**algorithm_kwargs)
