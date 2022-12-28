@@ -131,7 +131,8 @@ class RobotEnv(Env):
         reward = self._reward_fn()
         info = self.info()
 
-        self.update_history()
+        if done:
+            self.update_history()
 
         if done and self._log_file is not None:
             if len(info) > 0:
