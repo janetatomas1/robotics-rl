@@ -66,3 +66,5 @@ def train():
 
     algorithm = TD3(**algorithm_kwargs)
     algorithm.learn(**learn_kwargs)
+
+    env.close()

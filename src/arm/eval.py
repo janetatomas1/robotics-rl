@@ -67,3 +67,5 @@ def evaluate():
     for m in saved_models:
         evaluate_model(env, m, episodes, filename(m))
 
+    env.close()
+
