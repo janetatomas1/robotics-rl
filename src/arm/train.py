@@ -28,7 +28,7 @@ def train():
 
     env_kwargs = {
         "scene": str(scene),
-        "headless": True,
+        "headless": False,
         "episode_length": 50,
         "log_file": "/opt/results/values.csv",
         "reward_fn": "sparse_reward",
