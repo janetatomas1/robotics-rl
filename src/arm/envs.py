@@ -21,40 +21,23 @@ class ArmEnv(RobotEnv):
                  reset_actions=3,
                  joints=None,
                  max_speed=1,
-                 quaternion_threshold=0.05,
-                 with_quaternion=True,
                  **kwargs):
         super().__init__(**kwargs)
         self._joints = joints if joints is not None else [i for i in range(len(self._robot.joints))]
         self._nreset_actions = reset_actions
         self._reset_actions = list()
-        self._quaternion_threshold = quaternion_threshold
-        self._with_quaternion = with_quaternion
-        self._quaternion = np.zeros((4,)) if self._with_quaternion else None
         self._tip_path = list()
 
         _, joint_intervals = self._robot.get_joint_intervals()
 
-        if self._with_quaternion:
-            self._low = np.concatenate([
-                self._target_low,
-                [joint_intervals[j][0] for j in self._joints],
-                [-1, -1, -1, -1] if self._with_quaternion else [],
-            ])
-            self._high = np.concatenate([
-                self._target_high,
-                [joint_intervals[j][1] for j in self._joints],
-                [1, 1, 1, 1] if self._with_quaternion else [],
-            ])
-        else:
-            self._low = np.concatenate([
-                self._target_low,
-                [joint_intervals[j][0] for j in self._joints],
-            ])
-            self._high = np.concatenate([
-                self._target_high,
-                [joint_intervals[j][1] for j in self._joints],
-            ])
+        self._low = np.concatenate([
+            self._target_low,
+            [joint_intervals[j][0] for j in self._joints],
+        ])
+        self._high = np.concatenate([
+            self._target_high,
+            [joint_intervals[j][1] for j in self._joints],
+        ])
 
         self.observation_space = spaces.Box(
             low=self._low,
@@ -89,9 +72,8 @@ class ArmEnv(RobotEnv):
         self._robot.set_motor_locked_at_zero_velocity(False)
         state = self.observation_space.sample()
         self._target.set_position(state[:3])
-
-        if self._with_quaternion:
-            self._quaternion = state[-4:]
+        self._robot.set_joint_positions(state[3:])
+        self.get_pyrep_instance().step()
 
         for _ in range(self._nreset_actions):
             action = self.action_space.sample()
@@ -108,36 +90,18 @@ class ArmEnv(RobotEnv):
         return np.linalg.norm(np.array(self._robot.get_tip().get_position()) - np.array(self._target.get_position()))
 
     def get_state(self):
-        if self._with_quaternion:
-            return np.concatenate([self._target.get_position(), self.get_joint_values(), self._quaternion])
-
         return np.concatenate([self._target.get_position(), self.get_joint_values()])
 
     def get_joints(self):
         return self._joints
 
-    def get_desired_quaternion(self):
-        return self._quaternion
-
-    def get_quaternion(self):
-        return self.get_target().get_quaternion(self.get_robot().get_tip())
-
-    def quaternion_distance(self):
-        return np.linalg.norm(self._quaternion - self.get_quaternion())
-
     def is_close(self):
         return bool(self.distance() <= self._threshold)
 
     def reward_boost(self):
-        if self._with_quaternion:
-            return self.BOOSTED_REWARD - path_cost(self.get_path()) - self.quaternion_distance() * 3
-
         return self.BOOSTED_REWARD - path_cost(self.get_path())
 
     def info(self):
-        if self._with_quaternion and self.is_done():
-            return {"quaternion_distance": self.quaternion_distance()}
-
         return {}
 
     def get_reset_actions(self):
