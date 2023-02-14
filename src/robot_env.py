@@ -3,7 +3,7 @@ from gym import Env
 from pyrep import PyRep
 from pyrep.objects.shape import Shape
 
-from src.utils import path_cost
+from src.utils import distance
 from src.logger import BinaryLogger
 
 
@@ -78,7 +78,7 @@ class RobotEnv(Env):
         return self.STEP_FAILURE_REWARD
 
     def reward_boost(self):
-        return self.BOOSTED_REWARD - path_cost(self._path)
+        return self.BOOSTED_REWARD - distance(self._path)
 
     def reset_specific(self):
         pass

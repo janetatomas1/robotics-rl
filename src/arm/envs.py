@@ -11,7 +11,7 @@ from pyrep.robots.arms.lbr_iiwa_7_r800 import LBRIwaa7R800
 from pyrep.robots.arms.lbr_iiwa_14_r820 import LBRIwaa14R820
 
 from src.robot_env import RobotEnv
-from src.utils import path_cost
+from src.utils import distance
 
 
 class ArmEnv(RobotEnv):
@@ -99,7 +99,7 @@ class ArmEnv(RobotEnv):
         return bool(self.distance() <= self._threshold)
 
     def reward_boost(self):
-        return self.BOOSTED_REWARD - path_cost(self.get_path())
+        return self.BOOSTED_REWARD - distance(self.get_path())
 
     def info(self):
         return {}
