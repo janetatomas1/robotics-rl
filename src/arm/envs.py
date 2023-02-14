@@ -1,5 +1,6 @@
 import numpy as np
 from gym import spaces
+import math
 
 from pyrep.robots.arms.panda import Panda
 from pyrep.robots.arms.jaco import Jaco
@@ -9,14 +10,19 @@ from pyrep.robots.arms.ur5 import UR5
 from pyrep.robots.arms.ur10 import UR10
 from pyrep.robots.arms.lbr_iiwa_7_r800 import LBRIwaa7R800
 from pyrep.robots.arms.lbr_iiwa_14_r820 import LBRIwaa14R820
+from pyrep.const import ConfigurationPathAlgorithms
+from pyrep.errors import ConfigurationPathError
 
 from src.robot_env import RobotEnv
 from src.utils import distance
 
 
 class ArmEnv(RobotEnv):
-    INFO = {}
-
+    MAX_CONFIGS_DEFAULT = 100
+    TRIALS_DEFAULT = 1
+    MAX_TIME_MS_DEFAULT = 1
+    ALGORITHM_DEFAULT = ConfigurationPathAlgorithms.PRM
+    TRIALS_DEFAULT = 1
     def __init__(self,
                  reset_actions=3,
                  joints=None,
@@ -129,6 +135,71 @@ class ArmEnv(RobotEnv):
     def get_tip_path(self):
         return self._tip_path
 
+    def path_cost(self):
+        return distance(self.get_path())
+
+    def tip_path_cost(self):
+        return distance(self.get_tip_path())
+
+    def find_path_for_euler_angles(self, euler):
+        return self.get_robot().get_path(
+            position=self.get_target().get_position(),
+            euler=euler,
+            distance_threshold=self._threshold,
+            max_time_ms=self.MAX_TIME_MS_DEFAULT,
+            max_configs=self.MAX_CONFIGS_DEFAULT,
+            algorithm=self.ALGORITHM_DEFAULT,
+            trials=self.TRIALS_DEFAULT,
+        )
+
+    def find_optimal_path(self, step):
+        roll, yaw, pitch = 0, 0, 0
+        optimal_path = None
+        optimal_cost = np.inf
+        optimal_angles = None
+
+        should_restart = False
+        while roll < 2 * math.pi:
+            while yaw < 2 * math.pi:
+                while pitch < 2 * math.pi:
+
+                    if should_restart:
+                        self.clear_history()
+                        self.restart_simulation()
+                    path = None
+
+                    try:
+                        path = self.find_path_for_euler_angles([roll, yaw, pitch])
+                        should_restart = True
+                    except ConfigurationPathError:
+                        should_restart = False
+
+                    if path is not None:
+                        done = False
+                        self.update_history()
+
+                        while not done:
+                            done = path.step()
+                            self.get_pyrep_instance().step()
+                            self.update_history()
+
+                        cost = self.path_cost()
+                        if cost < optimal_cost and self.is_close():
+                            optimal_cost = cost
+                            optimal_path = path
+                            optimal_angles = [roll, yaw, pitch]
+
+                    print(roll, yaw, pitch, optimal_cost)
+                    pitch += step
+
+                yaw += step
+                pitch = 0
+
+            roll += step
+            yaw = 0
+
+        print(optimal_cost, optimal_angles)
+        return path
 
 class PandaEnv(ArmEnv):
     def __init__(self, **kwargs):
