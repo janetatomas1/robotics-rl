@@ -39,7 +39,6 @@ class RobotEnv(Env):
         self._pyrep.launch(scene_file=self._scene, headless=headless)
         self._robot = robot_class()
         self._target = Shape('target')
-        self.restart_simulation()
 
         self._logger = logger_class()
 
@@ -79,9 +78,6 @@ class RobotEnv(Env):
 
     def reward_boost(self):
         return self.BOOSTED_REWARD - distance(self._path)
-
-    def reset_specific(self):
-        pass
 
     def reset(self):
         self.restart_simulation()

@@ -50,6 +50,8 @@ class ArmEnv(RobotEnv):
             high=np.array([max_speed for _ in self._joints])
         )
 
+        self._starting_joint_positions = self.get_robot().get_joint_positions()
+
     def clear_history(self):
         super().clear_history()
         self._tip_path.clear()
@@ -68,20 +70,37 @@ class ArmEnv(RobotEnv):
     def reset(self):
         super().reset()
         self._reset_actions.clear()
-        self._robot.set_control_loop_enabled(False)
-        self._robot.set_motor_locked_at_zero_velocity(False)
         state = self.observation_space.sample()
         self._target.set_position(state[:3])
-        self._robot.set_joint_positions(state[3:])
         self.get_pyrep_instance().step()
 
         for _ in range(self._nreset_actions):
-            action = self.action_space.sample()
-            self._reset_actions.append(action)
-            self.move(action)
+            self._reset_actions.append(self.action_space.sample())
 
-        self.move(np.zeros((len(self._joints),)))
+        self.play_reset_actions()
+        self.empty_move()
+
         return self.get_state()
+
+    def restart_simulation(self):
+        super().restart_simulation()
+        self.get_robot().set_joint_positions(self._starting_joint_positions)
+        self.get_robot().set_control_loop_enabled(False)
+        self.get_robot().set_motor_locked_at_zero_velocity(False)
+        self.get_robot().set_joint_target_positions(self._starting_joint_positions)
+        self.empty_move()
+        self.get_pyrep_instance().step()
+
+    def play_reset_actions(self):
+        for v in self._reset_actions:
+            self.move(v)
+
+    def empty_move(self):
+        self.move(np.zeros((len(self._joints),)))
+
+    def play_reset_actions(self):
+        for v in self._reset_actions:
+            self.move(v)
 
     def get_joint_values(self):
         return np.array([self._robot.get_joint_positions()[j] for j in self._joints])
