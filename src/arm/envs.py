@@ -27,6 +27,7 @@ class ArmEnv(RobotEnv):
                  reset_actions=3,
                  joints=None,
                  max_speed=1,
+                 control_loop=False,
                  **kwargs):
         super().__init__(**kwargs)
         self._joints = joints if joints is not None else [i for i in range(len(self._robot.joints))]
@@ -57,6 +58,7 @@ class ArmEnv(RobotEnv):
         )
 
         self._starting_joint_positions = self.get_robot().get_joint_positions()
+        self._control_loop = control_loop
 
     def clear_history(self):
         super().clear_history()
@@ -88,12 +90,12 @@ class ArmEnv(RobotEnv):
 
         return self.get_state()
 
-    def restart_simulation(self):
-        super().restart_simulation()
+    def reset_robot(self):
+        super().reset_robot()
         self.get_robot().set_joint_positions(self._starting_joint_positions)
-        self.get_robot().set_control_loop_enabled(False)
-        self.get_robot().set_motor_locked_at_zero_velocity(False)
         self.get_robot().set_joint_target_positions(self._starting_joint_positions)
+        self.get_robot().set_control_loop_enabled(self._control_loop)
+        self.get_robot().set_motor_locked_at_zero_velocity(True)
         self.empty_move()
         self.get_pyrep_instance().step()
 
@@ -156,16 +158,14 @@ class ArmEnv(RobotEnv):
         roll, yaw, pitch = 0, 0, 0
         optimal_path = None
         optimal_cost = np.inf
-        optimal_angles = None
 
         should_restart = False
         while roll < 2 * math.pi:
             while yaw < 2 * math.pi:
                 while pitch < 2 * math.pi:
-
                     if should_restart:
                         self.clear_history()
-                        self.restart_simulation()
+                        self.reset_robot()
                     path = None
 
                     try:
@@ -187,19 +187,13 @@ class ArmEnv(RobotEnv):
                         if cost < optimal_cost and self.is_close():
                             optimal_cost = cost
                             optimal_path = path
-                            optimal_angles = [roll, yaw, pitch]
-
-                    print(roll, yaw, pitch, optimal_cost)
                     pitch += step
-
                 yaw += step
                 pitch = 0
 
             roll += step
             yaw = 0
-
-        print(optimal_cost, optimal_angles)
-        return path
+        return optimal_path
 
 class PandaEnv(ArmEnv):
     def __init__(self, **kwargs):

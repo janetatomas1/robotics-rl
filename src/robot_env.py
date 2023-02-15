@@ -37,6 +37,7 @@ class RobotEnv(Env):
 
         self._pyrep = PyRep()
         self._pyrep.launch(scene_file=self._scene, headless=headless)
+        self._pyrep.start()
         self._robot = robot_class()
         self._target = Shape('target')
 
@@ -46,10 +47,10 @@ class RobotEnv(Env):
             self._logger.open(self._log_file)
 
         self._path = list()
+        self._initial_robot_state = self._robot.get_configuration_tree()
 
-    def restart_simulation(self):
-        self._pyrep.stop()
-        self._pyrep.start()
+    def reset_robot(self):
+        self._pyrep.set_configuration_tree(self._initial_robot_state)
 
     def move(self, action):
         pass
@@ -80,7 +81,7 @@ class RobotEnv(Env):
         return self.BOOSTED_REWARD - distance(self._path)
 
     def reset(self):
-        self.restart_simulation()
+        self.reset_robot()
         self.clear_history()
         return self.get_state()
 
