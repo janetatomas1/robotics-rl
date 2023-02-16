@@ -22,15 +22,15 @@ from .envs import (
 )
 
 
-def create_obstacles_wrapper(n, low, high):
+def create_obstacles_wrapper(n):
     def create_obstacles():
         return [
             Shape.create(
                 type=PrimitiveShape.SPHERE,
-                size=[0.05, 0.05, 0.05],
+                size=[0.15, 0.15, 0.15],
                 color=[0.1, 1.0, 0.1],
                 static=True,
-                respondable=False
+                respondable=False,
             ) for _ in range(n)
         ]
 
