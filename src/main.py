@@ -18,4 +18,3 @@ if __name__ == "__main__":
     evaluate = importlib.import_module("src.arm.eval").evaluate
 
     train()
-    evaluate()

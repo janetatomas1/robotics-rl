@@ -192,7 +192,6 @@ class ArmEnv(RobotEnv):
                             optimal_cost = cost
                             optimal_path = path
                         count += 1
-                    print(count, roll, yaw, pitch, optimal_cost)
                     pitch += step
                 yaw += step
                 pitch = 0
@@ -200,6 +199,9 @@ class ArmEnv(RobotEnv):
             roll += step
             yaw = 0
         return optimal_path
+
+    def check_collision(self):
+        return any([self.get_robot().check_arm_collision(o) for o in self.get_obstacles()])
 
 class PandaEnv(ArmEnv):
     def __init__(self, **kwargs):

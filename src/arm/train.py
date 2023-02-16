@@ -5,7 +5,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import pathlib
-
+from pyrep.const import PrimitiveShape
+from pyrep.objects.shape import Shape
 
 from src.logger import CSVLogger
 from src.callback import CustomCallback
@@ -20,6 +21,20 @@ from .envs import (
     LBRIwaa14R820Env,
 )
 
+
+def create_obstacles_wrapper(n, low, high):
+    def create_obstacles():
+        return [
+            Shape.create(
+                type=PrimitiveShape.SPHERE,
+                size=[0.05, 0.05, 0.05],
+                color=[0.1, 1.0, 0.1],
+                static=True,
+                respondable=False
+            ) for _ in range(n)
+        ]
+
+        return create_obstacles
 
 def train():
     torch.set_num_threads(1)
