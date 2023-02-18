@@ -17,9 +17,10 @@ class RobotEnv(Env):
 
     def __init__(self,
                  scene,
-                 robot_class,
                  target_low,
                  target_high,
+                 robot_class=None,
+                 pr=None,
                  log_file=None,
                  threshold=0.1,
                  episode_length=50,
@@ -39,13 +40,21 @@ class RobotEnv(Env):
         self._rewards = list()
         self._reward_fn = getattr(self, reward_fn)
 
-        self._pyrep = PyRep()
-        self._pyrep.launch(scene_file=self._scene, headless=headless)
-        self._pyrep.start()
-        self._robot = robot_class()
+        if pr is None:
+            self._pyrep = PyRep()
+            self._pyrep.launch(scene_file=self._scene, headless=headless)
+            self._pyrep.start()
+        else:
+            self._pyrep = pr
+
+        if robot_class is not None:
+            self._robot = robot_class()
+            self._initial_robot_state = self._robot.get_configuration_tree()
+
         self._target = Shape('target')
         self._obstacles = self._obstacles_fn() if self._obstacles_fn is not None else list()
         self._collision_count = 0
+
         for o in self._obstacles:
             o.set_collidable(True)
 
@@ -55,7 +64,7 @@ class RobotEnv(Env):
             self._logger.open(self._log_file)
 
         self._path = list()
-        self._initial_robot_state = self._robot.get_configuration_tree()
+
 
     def reset_robot(self):
         self._pyrep.set_configuration_tree(self._initial_robot_state)
@@ -74,6 +83,9 @@ class RobotEnv(Env):
             return self.FAILURE_REWARD + punishment
 
         return self.STEP_FAILURE_REWARD + punishment
+
+    def boosted_reward(self):
+        return -self.distance()
 
     def boosted_sparse_reward(self):
         done = self.is_done()
@@ -127,7 +139,6 @@ class RobotEnv(Env):
 
     def update_history(self):
         self._rewards.append(self._reward_fn())
-
 
     def step(self, action):
         self._steps += 1
