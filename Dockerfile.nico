@@ -46,7 +46,7 @@ RUN sudo pip3 install virtualenv
 
 RUN mkdir nico-rl
 
-COPY requirements scripts .
+COPY requirements scripts ./
 
 RUN ./setup-nico.sh
 
