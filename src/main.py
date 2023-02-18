@@ -14,7 +14,7 @@ if __name__ == "__main__":
         f.write("branch: {}\n".format(repo.active_branch.name))
         f.write("commit: {}\n".format(repo.head.object.hexsha))
 
-    train = importlib.import_module("src.arm.train").train
+    train = importlib.import_module("src.nico.train").train
     evaluate = importlib.import_module("src.arm.eval").evaluate
 
     train()

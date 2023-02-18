@@ -4,7 +4,7 @@ from stable_baselines3 import TD3
 from stable_baselines3.common.noise import NormalActionNoise
 import pathlib
 
-from env import NicoEnv
+from src.nico.env import NicoEnv
 from src.callback import CustomCallback
 
 
@@ -33,6 +33,7 @@ def train():
         log_file='/opt/results/values.txt',
         target_low = [0, -0.3, 0.5],
         target_high = [0.3, 0.3, 0.8],
+        headless=True,
     )
 
     n_actions = env.action_space.shape[-1]
@@ -42,6 +43,3 @@ def train():
 
     model = TD3("MlpPolicy", env, action_noise=action_noise, verbose=1)
     model.learn(total_timesteps=200000, callback=callback)
-
-
-train()

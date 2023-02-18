@@ -11,10 +11,27 @@ from src.robot_env import RobotEnv
 
 
 class NicoEnv(RobotEnv):
-    def __init__(self, joints, scene, config, target_low, target_high, threshold=0.1, episode_length=40, log_file=None):
-        self._io = PyRepIO(scene)
-
-        super().__init__(scene=scene, target_low=target_low, target_high=target_high, pr=self._io.pyrep)
+    def __init__(
+            self,
+            joints,
+            scene,
+            config,
+            target_low,
+            target_high,
+            threshold=0.1,
+            episode_length=40,
+            log_file=None,
+            headless=False):
+        self._io = PyRepIO(scene, headless=headless)
+        super().__init__(
+            scene=scene,
+            target_low=target_low,
+            target_high=target_high,
+            pr=self._io.pyrep,
+            threshold=threshold,
+            episode_length=episode_length,
+            log_file=log_file
+        )
 
         self._joints = joints
         self._timesteps_per_move = 10
