@@ -48,7 +48,7 @@ RUN mkdir nico-rl
 
 COPY requirements scripts ./
 
-RUN ./setup-nico.sh
+RUN ./scripts/setup-nico.sh
 
 RUN mkdir /opt/results
 
