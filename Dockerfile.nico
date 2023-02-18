@@ -46,14 +46,13 @@ RUN sudo pip3 install virtualenv
 
 RUN mkdir robotics-rl
 
-WORKDIR /opt/robotic-rl
+ADD requirements/dev.txt scripts/setup-nico.sh ./
 
-COPY requirements requirements
-COPY scripts scripts
-
-RUN ./scripts/setup-nico.sh
+RUN ./setup-nico.sh
 
 RUN mkdir /opt/results
+
+WORKDIR /opt/robotics-rl
 
 ADD . .
 
