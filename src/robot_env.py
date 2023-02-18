@@ -1,6 +1,7 @@
 
 from gym import Env
 from pyrep import PyRep
+from pyrep.const import PrimitiveShape
 from pyrep.objects.shape import Shape
 
 from src.utils import distance
@@ -23,7 +24,7 @@ class RobotEnv(Env):
                  threshold=0.1,
                  episode_length=50,
                  headless=False,
-                 create_obstacles_fn=None,
+                 create_obstacles_fn='empty_fn',
                  logger_class=BinaryLogger,
                  reward_fn='sparse_reward'):
         self._threshold = threshold
@@ -33,11 +34,7 @@ class RobotEnv(Env):
         self._steps = 0
         self._target_low = target_low
         self._target_high = target_high
-        self._obstacles_fn = create_obstacles_fn
-
-        self._obstacles = self._obstacles_fn if self._obstacles_fn is not None else list()
-        for o in self._obstacles:
-            o.set_collidable(True)
+        self._obstacles_fn = getattr(self, create_obstacles_fn)
 
         self._rewards = list()
         self._reward_fn = getattr(self, reward_fn)
@@ -47,6 +44,10 @@ class RobotEnv(Env):
         self._pyrep.start()
         self._robot = robot_class()
         self._target = Shape('target')
+        self._obstacles = self._obstacles_fn() if self._obstacles_fn is not None else list()
+        self._collision_count = 0
+        for o in self._obstacles:
+            o.set_collidable(True)
 
         self._logger = logger_class()
 
@@ -122,6 +123,7 @@ class RobotEnv(Env):
         self._path.clear()
         self._rewards.clear()
         self._steps = 0
+        self._collision_count = 0
 
     def update_history(self):
         self._rewards.append(self._reward_fn())
@@ -142,7 +144,12 @@ class RobotEnv(Env):
 
         if done and self._log_file is not None:
             if len(info) > 0:
-                self.save_history(close=close, rewards=self._rewards, info={'info': info})
+                self.save_history(
+                    collision_count=self._collision_count,
+                    close=close,
+                    rewards=self._rewards,
+                    info={'info': info}
+                )
             else:
                 self.save_history(close=close, rewards=self._rewards)
 
@@ -173,3 +180,20 @@ class RobotEnv(Env):
 
     def check_collision(self):
         return False
+
+    @staticmethod
+    def static_sphere():
+        return [
+            Shape.create(
+                type=PrimitiveShape.SPHERE,
+                size=[0.25, 0.25, 0.15],
+                color=[0.0, 0.0, 1.0],
+                static=True,
+                respondable=False,
+                position=[0.9, 0.1, 1.1],
+            )
+        ]
+
+    @staticmethod
+    def empty_fn():
+        return list()

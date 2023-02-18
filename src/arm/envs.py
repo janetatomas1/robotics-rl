@@ -69,6 +69,9 @@ class ArmEnv(RobotEnv):
             self._robot.joints[j].set_joint_target_velocity(v)
 
         self._pyrep.step()
+        if self.check_collision():
+
+            self._collision_count += 1
 
     def reset(self):
         super().reset()
