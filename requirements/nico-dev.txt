@@ -47,12 +47,6 @@ matplotlib==3.5.3
 mistune==0.8.4
 mpmath==1.2.1
 networkx==2.2
-nicoaudio @ file:///home/janetatomas11/Desktop/NICO-software/api/src/nicoaudio
-nicoemotionrecognition @ file:///home/janetatomas11/Desktop/NICO-software/api/src/nicoemotionrecognition
-nicoface @ file:///home/janetatomas11/Desktop/NICO-software/api/src/nicoface
-nicomotion @ file:///home/janetatomas11/Desktop/NICO-software/api/src/nicomotion
-nicotouch @ file:///home/janetatomas11/Desktop/NICO-software/api/src/nicotouch
-nicovision @ file:///home/janetatomas11/Desktop/NICO-software/api/src/nicovision
 numpy==1.21.6
 nvidia-cublas-cu11==11.10.3.66
 nvidia-cuda-nvrtc-cu11==11.7.99
