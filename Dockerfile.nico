@@ -44,16 +44,17 @@ ADD scripts/source /usr/bin
 
 RUN sudo pip3 install virtualenv
 
-RUN mkdir nico-rl
+RUN mkdir robotics-rl
 
-COPY requirements scripts ./
+WORKDIR /opt/robotic-rl
+
+COPY requirements requirements
+COPY scripts scripts
 
 RUN ./scripts/setup-nico.sh
 
 RUN mkdir /opt/results
 
-WORKDIR /opt/nico-rl
-
 ADD . .
 
-ENTRYPOINT ["bash", "scripts/run.sh"]
+ENTRYPOINT ["bash", "scripts/run-nico.sh"]
