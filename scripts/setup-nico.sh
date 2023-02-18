@@ -7,4 +7,4 @@ virtualenv --python=python3.7 ~/.NICO-python3
 
 source NICO-software/api/NICO-python3.bash
 
-pip install -r requirements/dev.txt
+/root/.NICO-python3/bin/pip install -r requirements/dev.txt
