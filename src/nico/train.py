@@ -39,7 +39,7 @@ def train():
     n_actions = env.action_space.shape[-1]
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
 
-    callback = CustomCallback(n_steps=50000, save_path='/opt/results/models')
+    callback = CustomCallback(n_steps=5000, save_path='/opt/results/models')
 
     model = TD3("MlpPolicy", env, action_noise=action_noise, verbose=1)
     model.learn(total_timesteps=200000, callback=callback)

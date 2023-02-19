@@ -64,7 +64,7 @@ class NicoEnv(RobotEnv):
 
     def update_history(self):
         super().update_history()
-        self._tip_path.append()
+        # self._tip_path.append()
 
     def get_joint_values(self):
         return np.array([self._robot.getAngle(joint) for joint in self._joints])
@@ -86,7 +86,7 @@ class NicoEnv(RobotEnv):
         ) < self._threshold
 
     def is_done(self):
-        super().is_done() or self.has_fallen()
+        return self.is_close() or self._episode_length <= self._steps or self.has_fallen()
 
     def reset(self):
         self.clear_history()
