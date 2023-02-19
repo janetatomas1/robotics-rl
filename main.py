@@ -13,13 +13,12 @@ def main():
 
     volume_host_path = "{}/{}".format(volume_host_path_prefix, container_name)
 
-    environment = {
-        "VENV": "/opt/robotics-rl/venv/lib/python3.10/site-packages/",
-    }
-
-    container = client.containers.run(image="thesis-image", detach=True, name=container_name,
-                                      volumes={volume_host_path: {"bind": "/opt/results/", "mode": "rw"}},
-                                      environment=environment)
+    container = client.containers.run(
+        image="thesis-image",
+        detach=True,
+        name=container_name,
+        volumes={volume_host_path: {"bind": "/opt/results/", "mode": "rw"}}
+    )
     print(container.id)
 
 

@@ -56,4 +56,6 @@ WORKDIR /opt/robotics-rl
 
 ADD . .
 
+ENV VENV=/root/.NICO-python3/lib/python3.10/site-packages/
+
 ENTRYPOINT ["bash", "scripts/run-nico.sh"]
