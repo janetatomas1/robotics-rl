@@ -34,6 +34,7 @@ def train():
         target_low = [0, -0.3, 0.5],
         target_high = [0.3, 0.3, 0.8],
         headless=True,
+        reward_fn="boosted_reward",
     )
 
     n_actions = env.action_space.shape[-1]
