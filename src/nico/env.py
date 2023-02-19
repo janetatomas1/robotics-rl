@@ -12,25 +12,18 @@ from src.robot_env import RobotEnv
 
 class NicoEnv(RobotEnv):
     def __init__(
-            self,
-            joints,
-            scene,
-            config,
-            target_low,
-            target_high,
-            threshold=0.1,
-            episode_length=40,
-            log_file=None,
-            headless=False):
+        self,
+        joints,
+        scene,
+        config,
+        headless=False,
+        **kwargs,
+    ):
         self._io = PyRepIO(scene, headless=headless)
         super().__init__(
             scene=scene,
-            target_low=target_low,
-            target_high=target_high,
             pr=self._io.pyrep,
-            threshold=threshold,
-            episode_length=episode_length,
-            log_file=log_file
+            **kwargs,
         )
 
         self._joints = joints
@@ -47,8 +40,6 @@ class NicoEnv(RobotEnv):
         self._low = np.array([math.degrees(self._robot.getAngleLowerLimit(j)) for j in self._joints])
         self._high = np.array([math.degrees(self._robot.getAngleUpperLimit(j)) for j in self._joints])
 
-        self._target_low = target_low
-        self._target_high = target_high
         self.observation_space = Box(
             low=np.concatenate([self._target_low, self._low]),
             high=np.concatenate([self._target_high, self._high])
@@ -60,7 +51,6 @@ class NicoEnv(RobotEnv):
 
         self._fraction_max_speed = 0.2
         self._tip_path = list()
-        self._io.get_object
 
     def update_history(self):
         super().update_history()

@@ -43,3 +43,5 @@ def train():
 
     model = TD3("MlpPolicy", env, action_noise=action_noise, verbose=1)
     model.learn(total_timesteps=200000, callback=callback)
+
+train()
