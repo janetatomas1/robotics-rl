@@ -50,11 +50,14 @@ class NicoEnv(RobotEnv):
         )
 
         self._fraction_max_speed = 0.2
+
         self._tip_path = list()
+        self._tip = self._io.get_object("r_indexfingers_x")
 
     def update_history(self):
         super().update_history()
-        # self._tip_path.append()
+        self._tip_path.append(self._tip.get_position())
+        self._path.append(self.get_joint_values())
 
     def get_joint_values(self):
         return np.array([self._robot.getAngle(joint) for joint in self._joints])
@@ -97,3 +100,13 @@ class NicoEnv(RobotEnv):
 
         for i in range(self._timesteps_per_move):
             self._robot.nextSimulationStep()
+
+    def distance(self):
+        return np.linalg.norm(self._tip.get_position() - self.get_target().get_position())
+
+    def clear_history(self):
+        super().clear_history()
+        self._tip_path.clear()
+
+    def get_tip_path(self):
+        return self._tip_path

@@ -65,7 +65,6 @@ class RobotEnv(Env):
 
         self._path = list()
 
-
     def reset_robot(self):
         self._pyrep.set_configuration_tree(self._initial_robot_state)
 
@@ -162,7 +161,11 @@ class RobotEnv(Env):
                     info={'info': info}
                 )
             else:
-                self.save_history(close=close, rewards=self._rewards)
+                self.save_history(
+                    close=close,
+                    rewards=self._rewards,
+                    collision_count=self._collision_count
+                )
 
         return self.get_state(), reward, done, info
 

@@ -6,6 +6,7 @@ import pathlib
 
 from src.nico.env import NicoEnv
 from src.callback import CustomCallback
+from src.logger import CSVLogger
 
 
 def train():
@@ -18,7 +19,6 @@ def train():
         "r_wrist_z",
         "r_wrist_x",
         "r_indexfingers_x",
-        "r_thumb_x",
     ]
 
     root = pathlib.Path(__file__).parent.parent.parent
@@ -30,11 +30,12 @@ def train():
         joints=joints,
         scene=scene,
         config=config,
-        log_file='/opt/results/values.txt',
+        log_file='/opt/results/values.csv',
         target_low = [0, -0.3, 0.5],
         target_high = [0.3, 0.3, 0.8],
-        headless=True,
+        headless=False,
         reward_fn="boosted_reward",
+        logger_class=CSVLogger,
     )
 
     n_actions = env.action_space.shape[-1]
