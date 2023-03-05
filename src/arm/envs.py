@@ -22,7 +22,6 @@ class ArmEnv(RobotEnv):
                  reset_actions=3,
                  joints=None,
                  max_speed=1,
-                 control_loop=False,
                  **kwargs):
         super().__init__(**kwargs)
         self._joints = joints if joints is not None else [i for i in range(len(self._robot.joints))]
@@ -53,16 +52,23 @@ class ArmEnv(RobotEnv):
         )
 
         self._starting_joint_positions = self.get_robot().get_joint_positions()
-        self._control_loop = control_loop
+        self._control_loop = False
 
     def clear_history(self):
         super().clear_history()
         self._tip_path.clear()
 
+    def set_reset_actions(self, actions):
+        self._reset_actions = actions
+
     def update_history(self):
         super().update_history()
         self._path.append(self.get_joint_values())
         self._tip_path.append(self.get_robot().get_tip().get_position())
+
+    def set_control_loop(self, value):
+        self._control_loop = value
+        self.get_robot().set_control_loop_enabled(self._control_loop)
 
     def move(self, action):
         for j, v in zip(self._joints, action):
@@ -70,7 +76,6 @@ class ArmEnv(RobotEnv):
 
         self._pyrep.step()
         if self.check_collision():
-
             self._collision_count += 1
 
     def reset(self):
@@ -96,10 +101,6 @@ class ArmEnv(RobotEnv):
         self.get_robot().set_motor_locked_at_zero_velocity(True)
         self.empty_move()
         self.get_pyrep_instance().step()
-
-    def play_reset_actions(self):
-        for v in self._reset_actions:
-            self.move(v)
 
     def empty_move(self):
         self.move(np.zeros((len(self._joints),)))
