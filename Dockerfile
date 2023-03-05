@@ -33,7 +33,7 @@ RUN virtualenv venv
 
 COPY requirements requirements
 
-RUN . venv/scripts/activate && pip install -r setuptools=66
+RUN . venv/bin/activate && pip install -r setuptools=66
 RUN . venv/bin/activate && pip install -r requirements/dev.txt
 RUN . venv/bin/activate && pip install git+https://github.com/stepjam/PyRep.git
 
