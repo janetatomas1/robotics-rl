@@ -35,6 +35,10 @@ def train():
         "target_high": [1.0, 0.2, 1.4],
         "reset_actions": 5,
         "logger_class": CSVLogger,
+        "create_obstacles_fn": "dynamic_cuboid",
+        "dynamic_obstacles": True,
+        "obstacles_low": [0.01, 0.01, 0.01, -0.01, -0.01, -0.01],
+        "obstacles_high": [0.4, 0.4, 0.4, 0.1, 0.1, 0.1],
     }
 
     env = PandaEnv(**env_kwargs)

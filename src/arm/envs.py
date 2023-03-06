@@ -34,10 +34,13 @@ class ArmEnv(RobotEnv):
         self._low = np.concatenate([
             self._target_low,
             [joint_intervals[j][0] for j in self._joints],
+            self._obstacles_low,
         ])
+
         self._high = np.concatenate([
             self._target_high,
             [joint_intervals[j][1] for j in self._joints],
+            self._obstacles_high,
         ])
 
         self.observation_space = spaces.Box(
@@ -116,6 +119,9 @@ class ArmEnv(RobotEnv):
         return np.linalg.norm(np.array(self._robot.get_tip().get_position()) - np.array(self._target.get_position()))
 
     def get_state(self):
+        if self._dynamic_obstacles:
+            return np.concatenate([self._target.get_position(), self.get_joint_values(), self._obstacles_state])
+
         return np.concatenate([self._target.get_position(), self.get_joint_values()])
 
     def get_joints(self):
@@ -160,50 +166,6 @@ class ArmEnv(RobotEnv):
             distance_threshold=self._threshold,
         )
 
-    def find_optimal_path(self, step, **kwargs):
-        roll, yaw, pitch = 0, 0, 0
-        optimal_path = None
-        optimal_cost = np.inf
-
-        count = 0
-
-        should_restart = False
-        while roll < 2 * math.pi:
-            while yaw < 2 * math.pi:
-                while pitch < 2 * math.pi:
-                    if should_restart:
-                        self.clear_history()
-                        self.reset_robot()
-                    path = None
-
-                    try:
-                        path = self.find_path_for_euler_angles(euler=[roll, yaw, pitch], **kwargs)
-                        should_restart = True
-                    except ConfigurationPathError:
-                        should_restart = False
-
-                    if path is not None:
-                        done = False
-                        self.update_history()
-
-                        while not done:
-                            done = path.step()
-                            self.get_pyrep_instance().step()
-                            self.update_history()
-
-                        cost = self.path_cost()
-                        if cost < optimal_cost and self.is_close():
-                            optimal_cost = cost
-                            optimal_path = path
-                        count += 1
-                    pitch += step
-                yaw += step
-                pitch = 0
-
-            roll += step
-            yaw = 0
-        return optimal_path
-
     def check_collision(self):
         return any([self.get_robot().check_arm_collision(o) for o in self.get_obstacles()])
 
@@ -240,7 +202,6 @@ class UR10Env(ArmEnv):
 class LBRIwaa7R800Env(ArmEnv):
     def __init__(self, **kwargs):
         super().__init__(robot_class=LBRIwaa7R800, **kwargs)
-
 
 class LBRIwaa14R820Env(ArmEnv):
     def __init__(self, **kwargs):

@@ -36,6 +36,7 @@ def train():
         headless=False,
         reward_fn="boosted_reward",
         logger_class=CSVLogger,
+        create_obstacles_fn='static'
     )
 
     n_actions = env.action_space.shape[-1]

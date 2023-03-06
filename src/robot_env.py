@@ -3,6 +3,7 @@ from gym import Env
 from pyrep import PyRep
 from pyrep.const import PrimitiveShape
 from pyrep.objects.shape import Shape
+import numpy as np
 
 from src.utils import distance
 from src.logger import BinaryLogger
@@ -16,18 +17,22 @@ class RobotEnv(Env):
     STEP_FAILURE_REWARD = -1
 
     def __init__(self,
-                 scene,
-                 target_low,
-                 target_high,
-                 robot_class=None,
-                 pr=None,
-                 log_file=None,
-                 threshold=0.1,
-                 episode_length=50,
-                 headless=False,
-                 create_obstacles_fn='empty_fn',
-                 logger_class=BinaryLogger,
-                 reward_fn='sparse_reward'):
+             scene,
+             target_low,
+             target_high,
+             robot_class=None,
+             pr=None,
+             log_file=None,
+             threshold=0.1,
+             episode_length=50,
+             headless=False,
+             create_obstacles_fn='empty_fn',
+             logger_class=BinaryLogger,
+             reward_fn='sparse_reward',
+             dynamic_obstacles=False,
+             obstacles_low=None,
+             obstacles_high=None,
+        ):
         self._threshold = threshold
         self._log_file = log_file
         self._episode_length = episode_length
@@ -36,6 +41,9 @@ class RobotEnv(Env):
         self._target_low = target_low
         self._target_high = target_high
         self._obstacles_fn = getattr(self, create_obstacles_fn)
+        self._dynamic_obstacles = dynamic_obstacles
+        self._obstacles_low = [] if obstacles_low is None else obstacles_low
+        self._obstacles_high = [] if obstacles_high is None else obstacles_high
 
         self._rewards = list()
         self._reward_fn = getattr(self, reward_fn)
@@ -64,6 +72,8 @@ class RobotEnv(Env):
             self._logger.open(self._log_file)
 
         self._path = list()
+
+        self._obstacles_state = []
 
     def reset_robot(self):
         self._pyrep.set_configuration_tree(self._initial_robot_state)
@@ -104,6 +114,11 @@ class RobotEnv(Env):
     def reset(self):
         self.reset_robot()
         self.clear_history()
+
+        if self._dynamic_obstacles:
+            self.clear_obstacles()
+            self._obstacles = self._obstacles_fn()
+
         return self.get_state()
 
     def render(self, mode="human"):
@@ -195,19 +210,51 @@ class RobotEnv(Env):
     def check_collision(self):
         return False
 
-    @staticmethod
-    def static_sphere():
+    def clear_obstacles(self):
+        for o in self._obstacles:
+            o.remove()
+
+    def static_sphere(self):
+        self._obstacles_state = [0.25, 0.25, 0.15, 0.9, 0.1, 1.1]
         return [
             Shape.create(
                 type=PrimitiveShape.SPHERE,
-                size=[0.25, 0.25, 0.15],
+                size=self._obstacles_state[:3],
                 color=[0.0, 0.0, 1.0],
                 static=True,
                 respondable=False,
-                position=[0.9, 0.1, 1.1],
+                position=self._obstacles_state[3:],
             )
         ]
 
-    @staticmethod
-    def empty_fn():
+    def empty_fn(self):
         return list()
+
+    def static_cuboid(self):
+        self._obstacles_state = [0.15, 0.15, 0.15, 0.8, -0.1, 1.0]
+        return [
+            Shape.create(
+                type=PrimitiveShape.CUBOID,
+                size=self._obstacles_state[:3],
+                color=[0.0, 0.0, 1.0],
+                static=True,
+                respondable=True,
+                position=self._obstacles_state[3:],
+            )
+        ]
+
+    def dynamic_cuboid(self):
+        self._obstacles_state = np.random.uniform(
+            self._obstacles_low,
+            self._obstacles_high,
+        )
+        return [
+            Shape.create(
+                type=PrimitiveShape.CUBOID,
+                size=self._obstacles_state[:3].tolist(),
+                color=[0.0, 0.0, 1.0],
+                static=True,
+                respondable=True,
+                position=self._obstacles_state[3:].tolist(),
+            )
+        ]
