@@ -11,7 +11,6 @@ from pyrep.robots.arms.ur10 import UR10
 from pyrep.robots.arms.lbr_iiwa_7_r800 import LBRIwaa7R800
 from pyrep.robots.arms.lbr_iiwa_14_r820 import LBRIwaa14R820
 from pyrep.const import ConfigurationPathAlgorithms
-from pyrep.errors import ConfigurationPathError
 
 from src.robot_env import RobotEnv
 from src.utils import distance

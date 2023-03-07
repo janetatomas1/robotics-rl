@@ -42,8 +42,8 @@ class RobotEnv(Env):
         self._target_high = target_high
         self._obstacles_fn = getattr(self, create_obstacles_fn)
         self._dynamic_obstacles = dynamic_obstacles
-        self._obstacles_low = [] if obstacles_low is None else obstacles_low
-        self._obstacles_high = [] if obstacles_high is None else obstacles_high
+        self._obstacles_low = [] if obstacles_low is None else np.concatenate(obstacles_low)
+        self._obstacles_high = [] if obstacles_high is None else np.concatenate(obstacles_high)
 
         self._rewards = list()
         self._reward_fn = getattr(self, reward_fn)
@@ -243,7 +243,7 @@ class RobotEnv(Env):
             )
         ]
 
-    def dynamic_cuboid(self):
+    def dynamic_cuboids(self):
         self._obstacles_state = np.random.uniform(
             self._obstacles_low,
             self._obstacles_high,
@@ -251,10 +251,26 @@ class RobotEnv(Env):
         return [
             Shape.create(
                 type=PrimitiveShape.CUBOID,
-                size=self._obstacles_state[:3].tolist(),
+                size=self._obstacles_state[0:3].tolist(),
                 color=[0.0, 0.0, 1.0],
                 static=True,
                 respondable=True,
-                position=self._obstacles_state[3:].tolist(),
+                position=self._obstacles_state[3:6].tolist(),
+            ),
+            Shape.create(
+                type=PrimitiveShape.CUBOID,
+                size=self._obstacles_state[6:9].tolist(),
+                color=[0.0, 0.0, 1.0],
+                static=True,
+                respondable=True,
+                position=self._obstacles_state[9:12].tolist(),
+            ),
+            Shape.create(
+                type=PrimitiveShape.CUBOID,
+                size=self._obstacles_state[12:15].tolist(),
+                color=[0.0, 0.0, 1.0],
+                static=True,
+                respondable=True,
+                position=self._obstacles_state[15:18].tolist(),
             )
         ]
