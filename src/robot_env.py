@@ -1,4 +1,3 @@
-
 from gym import Env
 from pyrep import PyRep
 from pyrep.const import PrimitiveShape
@@ -17,22 +16,23 @@ class RobotEnv(Env):
     STEP_FAILURE_REWARD = -1
 
     def __init__(self,
-             scene,
-             target_low,
-             target_high,
-             robot_class=None,
-             pr=None,
-             log_file=None,
-             threshold=0.1,
-             episode_length=50,
-             headless=False,
-             create_obstacles_fn='empty_fn',
-             logger_class=BinaryLogger,
-             reward_fn='sparse_reward',
-             dynamic_obstacles=False,
-             obstacles_low=None,
-             obstacles_high=None,
-        ):
+                 scene,
+                 target_low,
+                 target_high,
+                 robot_class=None,
+                 pr=None,
+                 log_file=None,
+                 threshold=0.1,
+                 episode_length=50,
+                 headless=False,
+                 logger_class=BinaryLogger,
+                 reward_fn='sparse_reward',
+                 dynamic_obstacles=False,
+                 obstacles_low=None,
+                 obstacles_high=None,
+                 obstacle_state=None,
+                 obstacle_type=PrimitiveShape.CUBOID,
+                 ):
         self._threshold = threshold
         self._log_file = log_file
         self._episode_length = episode_length
@@ -40,10 +40,14 @@ class RobotEnv(Env):
         self._steps = 0
         self._target_low = target_low
         self._target_high = target_high
-        self._obstacles_fn = getattr(self, create_obstacles_fn)
         self._dynamic_obstacles = dynamic_obstacles
-        self._obstacles_low = [] if obstacles_low is None else np.concatenate(obstacles_low)
-        self._obstacles_high = [] if obstacles_high is None else np.concatenate(obstacles_high)
+        self._obstacles_low = np.array([] if obstacles_low is None else np.concatenate(obstacles_low))
+        self._obstacles_high = np.array([] if obstacles_high is None else np.concatenate(obstacles_high))
+        self._obstacles_state = np.array([] if obstacle_state is None else obstacle_state)
+        self._obstacle_type = obstacle_type
+        self._obstacle_color = [0, 0, 1]
+        self._obstacles_number = len(obstacles_high)
+        self._obstacles = list()
 
         self._rewards = list()
         self._reward_fn = getattr(self, reward_fn)
@@ -60,7 +64,7 @@ class RobotEnv(Env):
             self._initial_robot_state = self._robot.get_configuration_tree()
 
         self._target = Shape('target')
-        self._obstacles = self._obstacles_fn() if self._obstacles_fn is not None else list()
+        self.create_obstacles()
         self._collision_count = 0
 
         for o in self._obstacles:
@@ -72,8 +76,6 @@ class RobotEnv(Env):
             self._logger.open(self._log_file)
 
         self._path = list()
-
-        self._obstacles_state = []
 
     def reset_robot(self):
         self._pyrep.set_configuration_tree(self._initial_robot_state)
@@ -117,7 +119,7 @@ class RobotEnv(Env):
 
         if self._dynamic_obstacles:
             self.clear_obstacles()
-            self._obstacles = self._obstacles_fn()
+            self.create_obstacles()
 
         return self.get_state()
 
@@ -214,65 +216,17 @@ class RobotEnv(Env):
         for o in self._obstacles:
             o.remove()
 
-    def static_sphere(self):
-        self._obstacles_state = [0.25, 0.25, 0.15, 0.9, 0.1, 1.1]
-        return [
-            Shape.create(
-                type=PrimitiveShape.SPHERE,
-                size=self._obstacles_state[:3],
-                color=[0.0, 0.0, 1.0],
-                static=True,
-                respondable=False,
-                position=self._obstacles_state[3:],
-            )
-        ]
+    def create_obstacles(self):
+        if self._dynamic_obstacles:
+            self._obstacles_state = np.random.uniform(self._obstacles_low, self._obstacles_high)
 
-    def empty_fn(self):
-        return list()
-
-    def static_cuboid(self):
-        self._obstacles_state = [0.15, 0.15, 0.15, 0.8, -0.1, 1.0]
-        return [
+        self._obstacles = [
             Shape.create(
-                type=PrimitiveShape.CUBOID,
-                size=self._obstacles_state[:3],
-                color=[0.0, 0.0, 1.0],
-                static=True,
-                respondable=True,
-                position=self._obstacles_state[3:],
-            )
-        ]
-
-    def dynamic_cuboids(self):
-        self._obstacles_state = np.random.uniform(
-            self._obstacles_low,
-            self._obstacles_high,
-        )
-        return [
-            Shape.create(
-                type=PrimitiveShape.CUBOID,
-                size=self._obstacles_state[0:3].tolist(),
-                color=[0.0, 0.0, 1.0],
-                static=True,
-                respondable=True,
-                position=self._obstacles_state[3:6].tolist(),
-            ),
-            Shape.create(
-                type=PrimitiveShape.CUBOID,
-                size=self._obstacles_state[6:9].tolist(),
-                color=[0.0, 0.0, 1.0],
-                static=True,
-                respondable=True,
-                position=self._obstacles_state[9:12].tolist(),
-            ),
-            Shape.create(
-                type=PrimitiveShape.CUBOID,
-                size=self._obstacles_state[12:15].tolist(),
-                color=[0.0, 0.0, 1.0],
-                static=True,
-                respondable=True,
-                position=self._obstacles_state[15:18].tolist(),
-            )
+                type=self._obstacle_type,
+                color=self._obstacle_color,
+                size=self._obstacles_state[(6 * i):(6 * i + 3)].tolist(),
+                position=self._obstacles_state[(6 * i + 3):(6 * i + 6)].tolist(),
+            ) for i in range(self._obstacles_number)
         ]
 
     def reset_target(self):
@@ -283,4 +237,3 @@ class RobotEnv(Env):
             self.get_target().set_position(position=position)
             self.get_pyrep_instance().step()
             done = not any([self._target.check_collision(o) for o in self._obstacles])
-
