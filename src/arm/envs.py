@@ -18,7 +18,7 @@ from src.utils import distance
 
 class ArmEnv(RobotEnv):
     def __init__(self,
-                 reset_actions=3,
+                 reset_actions=5,
                  joints=None,
                  max_speed=1,
                  **kwargs):
@@ -83,8 +83,7 @@ class ArmEnv(RobotEnv):
     def reset(self):
         super().reset()
         self._reset_actions.clear()
-        state = self.observation_space.sample()
-        self._target.set_position(state[:3])
+        self.reset_target()
         self.get_pyrep_instance().step()
 
         for _ in range(self._nreset_actions):
@@ -167,6 +166,7 @@ class ArmEnv(RobotEnv):
 
     def check_collision(self):
         return any([self.get_robot().check_arm_collision(o) for o in self.get_obstacles()])
+
 
 class PandaEnv(ArmEnv):
     def __init__(self, **kwargs):
