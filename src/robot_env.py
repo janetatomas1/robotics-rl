@@ -281,5 +281,6 @@ class RobotEnv(Env):
         while not done:
             position = np.random.uniform(self._target_low, self._target_high)
             self.get_target().set_position(position=position)
-            done = any([self._target.check_collision(o) for o in self._obstacles])
+            self.get_pyrep_instance().step()
+            done = not any([self._target.check_collision(o) for o in self._obstacles])
 
