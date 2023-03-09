@@ -30,8 +30,8 @@ class RobotEnv(Env):
                  dynamic_obstacles=False,
                  obstacles_low=None,
                  obstacles_high=None,
-                 obstacle_state=None,
-                 obstacle_type=PrimitiveShape.CUBOID,
+                 obstacles_state=None,
+                 obstacles_type=PrimitiveShape.CUBOID,
                  ):
         self._threshold = threshold
         self._log_file = log_file
@@ -43,10 +43,16 @@ class RobotEnv(Env):
         self._dynamic_obstacles = dynamic_obstacles
         self._obstacles_low = np.array([] if obstacles_low is None else np.concatenate(obstacles_low))
         self._obstacles_high = np.array([] if obstacles_high is None else np.concatenate(obstacles_high))
-        self._obstacles_state = np.array([] if obstacle_state is None else obstacle_state)
-        self._obstacle_type = obstacle_type
+        self._obstacles_state = np.array([] if obstacles_state is None else np.concatenate(obstacles_state))
+        self._obstacle_type = obstacles_type
         self._obstacle_color = [0, 0, 1]
-        self._obstacles_number = len(obstacles_high)
+        self._obstacles_number = 0
+
+        if self._dynamic_obstacles:
+            self._obstacles_number = len(obstacles_low)
+        elif obstacles_state is not None:
+            self._obstacles_number = len(obstacles_state)
+
         self._obstacles = list()
 
         self._rewards = list()
@@ -115,6 +121,7 @@ class RobotEnv(Env):
 
     def reset(self):
         self.reset_robot()
+        self.reset_target()
         self.clear_history()
 
         if self._dynamic_obstacles:

@@ -83,7 +83,6 @@ class ArmEnv(RobotEnv):
     def reset(self):
         super().reset()
         self._reset_actions.clear()
-        self.reset_target()
         self.get_pyrep_instance().step()
 
         for _ in range(self._nreset_actions):
