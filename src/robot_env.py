@@ -120,7 +120,6 @@ class RobotEnv(Env):
         return self.BOOSTED_REWARD - distance(self._path)
 
     def reset(self):
-        print(self._collision_count)
         self.reset_robot()
         self.reset_target()
         self.clear_history()
