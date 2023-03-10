@@ -19,7 +19,7 @@ def main():
         name=container_name,
         volumes={
             results_path: {"bind": "/opt/results/", "mode": "rw"},
-            positions_path: {"bind": "/opt/results/", "mode": "rw"},
+            positions_path: {"bind": "/opt/positions/", "mode": "rw"},
         }
     )
     print(container.id)

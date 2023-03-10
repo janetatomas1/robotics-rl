@@ -65,13 +65,18 @@ def evaluate():
         "target_high": [1.0, 0.2, 1.4],
         "reset_actions": 5,
         "logger_class": BinaryLogger,
+        "dynamic_obstacles": False,
+        "obstacles_state": [
+            [0.5, 0.5, 0.6, 0.3, 0.4, 0.5],
+            [0.5, 0.25, 0.75, 0.5, -0.25, 1.2],
+        ],
     }
 
     env = PandaEnv(**env_kwargs)
 
     saved_models = glob.glob('/opt/results/models/*.zip')
 
-    positions_file = open('/opt/results/positions.json')
+    positions_file = open('/opt/positions/positions.json')
     positions = json.load(positions_file)
     positions_file.close()
 
