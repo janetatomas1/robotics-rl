@@ -1,3 +1,4 @@
+import json
 
 from stable_baselines3 import TD3
 import pathlib
@@ -7,20 +8,26 @@ import glob
 from .envs import PandaEnv
 from src.logger import BinaryLogger
 import os
+import json
 
 
 def filename(m):
     return m.replace('models', 'eval').replace('zip', 'pickle')
 
 
-def evaluate_model(env, model_file, episodes, log_file):
+def evaluate_model(env, model_file, positions, log_file):
     model = TD3.load(model_file)
 
     logger = env.get_logger()
     logger.open(log_file)
 
-    for _ in range(episodes):
-        obs = env.reset()
+    for p in positions:
+        env.reset_robot()
+        env.set_reset_actions(p['actions'])
+        env.get_target().set_position(p['target_pos'])
+        env.play_reset_actions()
+
+        obs = env.get_state()
         done = False
 
         while not done:
@@ -32,6 +39,7 @@ def evaluate_model(env, model_file, episodes, log_file):
             tip_path=env.get_tip_path(),
             target_position=env.get_target().get_position(),
             success=env.is_close(),
+            id_=p['id_'],
         )
 
     logger.close()
@@ -50,7 +58,7 @@ def evaluate():
 
     env_kwargs = {
         "scene": str(scene),
-        "headless": True,
+        "headless": False,
         "episode_length": 50,
         "reward_fn": "sparse_reward",
         "target_low": [0.8, -0.2, 1.0],
@@ -63,8 +71,12 @@ def evaluate():
 
     saved_models = glob.glob('/opt/results/models/*.zip')
 
+    positions_file = open('/opt/results/positions.json')
+    positions = json.load(positions_file)
+    positions_file.close()
+
     for m in saved_models:
-        evaluate_model(env, m, episodes, filename(m))
+        evaluate_model(env, m, positions, filename(m))
 
     env.close()
 
