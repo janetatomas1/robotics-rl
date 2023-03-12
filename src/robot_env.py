@@ -110,7 +110,23 @@ class RobotEnv(Env):
         punishment = self.COLLISION_REWARD if self.check_collision() else 0
 
         if close:
-            return self.reward_boost() + punishment
+            return self.reward_boost()
+        elif done:
+            return self.FAILURE_REWARD + punishment
+
+        return self.STEP_FAILURE_REWARD + punishment
+
+    def boosted_sparse_reward_punished(self):
+        done = self.is_done()
+        close = self.is_close()
+        punishment = self.COLLISION_REWARD if self.check_collision() else 0
+
+        if close:
+            if self._collision_count > 0:
+                return 0
+
+            return self.reward_boost()
+
         elif done:
             return self.FAILURE_REWARD + punishment
 
