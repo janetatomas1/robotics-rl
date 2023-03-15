@@ -14,6 +14,9 @@ class RobotEnv(Env):
     COLLISION_REWARD = -3
     FAILURE_REWARD = -5
     STEP_FAILURE_REWARD = -1
+    SHORT_PATH_REWARD = 20
+    SHORT_REWARD_THRESHOLD = 1
+
 
     def __init__(self,
                  scene,
@@ -110,27 +113,20 @@ class RobotEnv(Env):
         punishment = self.COLLISION_REWARD if self.check_collision() else 0
 
         if close:
-            return self.reward_boost()
+            return self.reward_boost() + punishment
         elif done:
             return self.FAILURE_REWARD + punishment
 
         return self.STEP_FAILURE_REWARD + punishment
 
-    def boosted_sparse_reward_punished(self):
-        done = self.is_done()
-        close = self.is_close()
-        punishment = self.COLLISION_REWARD if self.check_collision() else 0
+    def path_cost(self):
+        return distance(self._path)
 
-        if close:
-            if self._collision_count > 0:
-                return 0
+    def double_boosted_sparse_reward(self):
+        if self.is_close() and self.path_cost() < self.SHORT_REWARD_THRESHOLD:
+            return self.boosted_sparse_reward() + self.SHORT_PATH_REWARD
 
-            return self.reward_boost()
-
-        elif done:
-            return self.FAILURE_REWARD + punishment
-
-        return self.STEP_FAILURE_REWARD + punishment
+        return self.boosted_sparse_reward()
 
     def reward_boost(self):
         return self.BOOSTED_REWARD - distance(self._path)

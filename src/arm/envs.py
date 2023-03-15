@@ -139,9 +139,6 @@ class ArmEnv(RobotEnv):
     def get_tip_path(self):
         return self._tip_path
 
-    def path_cost(self):
-        return distance(self.get_path())
-
     def tip_path_cost(self):
         return distance(self.get_tip_path())
 
