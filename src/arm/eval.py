@@ -6,7 +6,7 @@ import torch
 import glob
 
 from .envs import PandaEnv
-from src.logger import BinaryLogger
+from src.logger import CSVLogger
 import os
 import json
 
@@ -35,9 +35,8 @@ def evaluate_model(env, model_file, positions, log_file):
             obs, _, done, _ = env.step(action)
 
         env.save_history(
-            path=env.get_path(),
-            tip_path=env.get_tip_path(),
-            target_position=env.get_target().get_position(),
+            distance=env.path_cost(),
+            tip_distance=env.tip_path_cost(),
             success=env.is_close(),
             id_=p['id_'],
         )
@@ -64,7 +63,7 @@ def evaluate():
         "target_low": [0.8, -0.2, 1.0],
         "target_high": [1.0, 0.2, 1.4],
         "reset_actions": 5,
-        "logger_class": BinaryLogger,
+        "logger_class": CSVLogger,
         "dynamic_obstacles": False,
         "obstacles_state": [
             [0.5, 0.5, 0.6, 0.3, 0.4, 0.5],
@@ -84,4 +83,3 @@ def evaluate():
         evaluate_model(env, m, positions, filename(m))
 
     env.close()
-
