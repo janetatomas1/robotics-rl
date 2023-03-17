@@ -23,9 +23,9 @@ def evaluate_model(env, model_file, positions, log_file):
 
     for p in positions:
         env.reset_robot()
-        env.set_reset_actions(p['actions'])
+        env.set_starting_joint_values(p['starting_joint_positions'])
+        env.reset_joint_values()
         env.get_target().set_position(p['target_pos'])
-        env.play_reset_actions()
 
         obs = env.get_state()
         done = False

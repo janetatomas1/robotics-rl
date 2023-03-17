@@ -1,6 +1,5 @@
 import numpy as np
 from gym import spaces
-import math
 
 from pyrep.robots.arms.panda import Panda
 from pyrep.robots.arms.jaco import Jaco
@@ -89,6 +88,7 @@ class ArmEnv(RobotEnv):
             self._reset_actions.append(self.action_space.sample())
 
         self.play_reset_actions()
+        self._starting_joint_positions = self.get_joint_values()
         self.empty_move()
 
         return self.get_state()
@@ -101,6 +101,13 @@ class ArmEnv(RobotEnv):
         self.get_robot().set_motor_locked_at_zero_velocity(True)
         self.empty_move()
         self.get_pyrep_instance().step()
+
+    def reset_joint_values(self):
+        self.set_control_loop(True)
+        self.get_robot().set_joint_positions(self._starting_joint_positions)
+        self.get_robot().set_joint_target_positions(self._starting_joint_positions)
+        self.set_control_loop(False)
+        self.empty_move()
 
     def empty_move(self):
         self.move(np.zeros((len(self._joints),)))
@@ -162,6 +169,12 @@ class ArmEnv(RobotEnv):
 
     def check_collision(self):
         return any([self.get_robot().check_arm_collision(o) for o in self.get_obstacles()])
+
+    def get_starting_joint_values(self):
+        return self._starting_joint_positions
+
+    def set_starting_joint_values(self, values):
+        self._starting_joint_positions = values
 
 
 class PandaEnv(ArmEnv):
