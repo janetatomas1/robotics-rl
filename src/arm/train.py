@@ -42,6 +42,8 @@ def train():
     }
 
     env = PandaEnv(**env_kwargs)
+    env.set_control_loop(False)
+
     n_actions = len(env.get_joints())
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
 

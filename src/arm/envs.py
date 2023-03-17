@@ -89,7 +89,7 @@ class ArmEnv(RobotEnv):
             self._reset_actions.append(self.action_space.sample())
 
         self.play_reset_actions()
-        self._starting_joint_positions = self.get_joint_values()
+        self._reset_joint_positions = self.get_joint_values()
         self.empty_move()
 
         return self.get_state()
@@ -97,18 +97,11 @@ class ArmEnv(RobotEnv):
     def reset_robot(self):
         super().reset_robot()
         self.get_robot().set_joint_positions(self._starting_joint_positions)
-        self.get_robot().set_joint_target_positions(self._starting_joint_positions)
-        self.get_robot().set_control_loop_enabled(self._control_loop)
-        self.get_robot().set_motor_locked_at_zero_velocity(True)
-        self.empty_move()
-        self.get_pyrep_instance().step()
+        self.get_pyrep_instance().step_ui()
 
     def reset_joint_values(self):
-        self.set_control_loop(True)
-        self.get_robot().set_joint_positions(self._starting_joint_positions)
-        self.get_robot().set_joint_target_positions(self._starting_joint_positions)
-        self.set_control_loop(False)
-        self.empty_move()
+        self.get_robot().set_joint_positions(self._reset_joint_positions)
+        self.get_pyrep_instance().step_ui()
 
     def empty_move(self):
         self.move(np.zeros((len(self._joints),)))
