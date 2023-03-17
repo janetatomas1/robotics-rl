@@ -52,7 +52,8 @@ class ArmEnv(RobotEnv):
             high=np.array([max_speed for _ in self._joints])
         )
 
-        self._starting_joint_positions = self.get_robot().get_joint_positions()
+        self._starting_joint_positions = self.get_joint_values()
+        self._reset_joint_positions = self.get_joint_values()
         self._control_loop = False
 
     def clear_history(self):
@@ -173,8 +174,11 @@ class ArmEnv(RobotEnv):
     def get_starting_joint_values(self):
         return self._starting_joint_positions
 
-    def set_starting_joint_values(self, values):
-        self._starting_joint_positions = values
+    def set_reset_joint_values(self, values):
+        self._reset_joint_positions = values
+
+    def get_reset_joint_values(self):
+        return self._reset_joint_positions
 
 
 class PandaEnv(ArmEnv):
@@ -210,6 +214,7 @@ class UR10Env(ArmEnv):
 class LBRIwaa7R800Env(ArmEnv):
     def __init__(self, **kwargs):
         super().__init__(robot_class=LBRIwaa7R800, **kwargs)
+
 
 class LBRIwaa14R820Env(ArmEnv):
     def __init__(self, **kwargs):
