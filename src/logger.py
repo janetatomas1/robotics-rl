@@ -12,7 +12,7 @@ class Logger:
         pass
 
     def close(self):
-        self._file.close()
+        pass
 
     def open(self, path):
         self._path = path
