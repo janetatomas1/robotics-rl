@@ -21,7 +21,7 @@ n = 1000
 m = 5
 scene = str(pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'scene_panda.ttt'))
 target_low, target_high = [0.8, -0.2, 1.0], [1.0, 0.2, 1.4]
-step = math.radians(15)
+step = math.radians(30)
 alphabet = 'abcdefghijklmnopqrstuvxyz0123456789'
 
 
