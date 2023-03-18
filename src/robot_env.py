@@ -104,7 +104,7 @@ class RobotEnv(Env):
 
         return self.STEP_FAILURE_REWARD + punishment
 
-    def boosted_reward(self):
+    def simple_reward(self):
         return -self.distance()
 
     def boosted_sparse_reward(self):
@@ -118,6 +118,21 @@ class RobotEnv(Env):
             return self.FAILURE_REWARD + punishment
 
         return self.STEP_FAILURE_REWARD + punishment
+
+    def boosted_sparse_standardized_reward(self):
+        done = self.is_done()
+        close = self.is_close()
+        punishment = self.COLLISION_REWARD if self.check_collision() else 0
+
+        if close:
+            return self.standardized_punishment() + punishment
+        elif done:
+            return self.FAILURE_REWARD + punishment
+
+        return self.STEP_FAILURE_REWARD + punishment
+
+    def standardized_punishment(self):
+        return 1
 
     def path_cost(self):
         return distance(self._path)
