@@ -1,6 +1,6 @@
 import json
 
-from stable_baselines3 import TD3
+from stable_baselines3 import DDPG
 import pathlib
 import torch
 import glob
@@ -16,14 +16,14 @@ def filename(m):
 
 
 def evaluate_model(env, model_file, positions, log_file):
-    model = TD3.load(model_file)
+    model = DDPG.load(model_file)
 
     logger = env.get_logger()
     logger.open(log_file)
 
     for p in positions:
         env.reset_robot()
-        env.set_starting_joint_values(p['starting_joint_positions'])
+        env.set_reset_joint_values(p['starting_joint_positions'])
         env.reset_joint_values()
         env.get_target().set_position(p['target_pos'])
 
@@ -65,10 +65,6 @@ def evaluate():
         "reset_actions": 5,
         "logger_class": CSVLogger,
         "dynamic_obstacles": False,
-        "obstacles_state": [
-            [0.5, 0.5, 0.6, 0.3, 0.4, 0.5],
-            [0.5, 0.25, 0.75, 0.5, -0.25, 1.2],
-        ],
     }
 
     env = PandaEnv(**env_kwargs)

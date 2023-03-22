@@ -1,5 +1,5 @@
 
-from stable_baselines3 import TD3
+from stable_baselines3 import DDPG
 from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 import torch
@@ -36,9 +36,6 @@ def train():
         "reset_actions": 5,
         "logger_class": CSVLogger,
         "dynamic_obstacles": False,
-        "obstacles_state": [
-            [0.25, 0.25, 0.25, 0.2, 0.2, 0.1],
-        ],
     }
 
     env = PandaEnv(**env_kwargs)
@@ -68,7 +65,7 @@ def train():
         "total_timesteps": 500000
     }
 
-    algorithm = TD3(**algorithm_kwargs)
+    algorithm = DDPG(**algorithm_kwargs)
     algorithm.learn(**learn_kwargs)
 
     env.close()
