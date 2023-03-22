@@ -180,6 +180,21 @@ class ArmEnv(RobotEnv):
         return self.path_cost() / \
             (np.linalg.norm(self.get_target().get_position() - self.get_tip_path()[0]) ** self._normalization_exponent)
 
+    def tip_boosted_sparse_reward(self):
+        done = self.is_done()
+        close = self.is_close()
+        punishment = self._collision_reward if self.check_collision() else 0
+
+        if close:
+            return self.tip_reward_boost() + punishment
+        elif done:
+            return self._failure_reward + punishment
+
+        return self._step_failure_reward + punishment
+
+    def tip_reward_boost(self):
+        return self._boosted_reward - self.tip_path_cost()
+
 
 class PandaEnv(ArmEnv):
     def __init__(self, **kwargs):
