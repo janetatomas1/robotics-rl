@@ -32,9 +32,15 @@ env_kwargs = {
 algorithm_class = TD3
 
 
+def get_env():
+    env = PandaEnv(**env_kwargs)
+    env.set_control_loop(False)
+    return env
+
+
 def train():
     torch.set_num_threads(1)
-    env = PandaEnv(**env_kwargs)
+    env = get_env()
 
     callback_kwargs = {
         "n_steps": 10000,
@@ -77,7 +83,7 @@ def evaluate_model(env, model_file, positions, log_file):
 
     for p in positions:
         env.reset_robot()
-        env.set_reset_joint_values(p['starting_joint_positions'])
+        env.set_reset_joint_values(p['joints'])
         env.reset_joint_values()
         env.get_target().set_position(p['target_pos'])
 
@@ -106,7 +112,7 @@ def evaluate():
 
     torch.set_num_threads(1)
 
-    env = PandaEnv(**env_kwargs)
+    env = get_env()
 
     saved_models = glob.glob('/opt/results/models/*.zip')
 
