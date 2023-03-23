@@ -10,4 +10,4 @@ from .envs import (
     LBRIwaa7R800Env,
     LBRIwaa14R820Env,
 )
-from src.arm.train import train
+from src.arm.learn import train

@@ -132,7 +132,10 @@ class ArmEnv(RobotEnv):
         return self._boosted_reward - distance(self.get_path())
 
     def info(self):
-        return {}
+        return {
+            'path_cost': self.path_cost(),
+            'tip_path_cost': self.tip_path_cost(),
+        }
 
     def get_reset_actions(self):
         return self._reset_actions
