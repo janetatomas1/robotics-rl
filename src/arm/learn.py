@@ -64,7 +64,7 @@ def train():
 
     learn_kwargs = {
         "callback": callback,
-        "total_timesteps": 500000
+        "total_timesteps": 50
     }
 
     model = algorithm_class(**algorithm_kwargs)
@@ -84,7 +84,7 @@ def evaluate_model(env, model_file, positions, log_file):
     logger.open(log_file)
 
     for p in positions:
-        env.reset_robot()
+        env.empty_move()
         env.set_reset_joint_values(p['joints'])
         env.reset_joint_values()
         env.get_target().set_position(p['target_pos'])
