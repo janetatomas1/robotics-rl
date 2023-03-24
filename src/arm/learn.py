@@ -101,6 +101,8 @@ def evaluate_model(env, model_file, positions, log_file):
             tip_distance=env.tip_path_cost(),
             success=env.is_close(),
             id_=p['id_'],
+            steps=env.get_steps(),
+            collision_count=env.get_collision_count(),
         )
 
     logger.close()

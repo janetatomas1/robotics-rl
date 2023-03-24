@@ -135,6 +135,8 @@ class ArmEnv(RobotEnv):
         return {
             'path_cost': self.path_cost(),
             'tip_path_cost': self.tip_path_cost(),
+            'collision_count': self._collision_count,
+            'close': int(self.is_close()),
         }
 
     def get_reset_actions(self):

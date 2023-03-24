@@ -205,16 +205,12 @@ class RobotEnv(Env):
         if done and self._log_file is not None:
             if len(info) > 0:
                 self.save_history(
-                    collision_count=self._collision_count,
-                    close=close,
                     rewards=self._rewards,
                     info={'info': info}
                 )
             else:
                 self.save_history(
-                    close=close,
                     rewards=self._rewards,
-                    collision_count=self._collision_count
                 )
 
         return self.get_state(), reward, done, info
@@ -272,3 +268,9 @@ class RobotEnv(Env):
             self.get_target().set_position(position=position)
             self.get_pyrep_instance().step()
             done = not any([self._target.check_collision(o) for o in self._obstacles])
+
+    def get_steps(self):
+        return self._steps
+
+    def get_collision_count(self):
+        return self._collision_count
