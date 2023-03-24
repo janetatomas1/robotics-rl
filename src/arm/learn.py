@@ -70,6 +70,8 @@ def train():
     model = algorithm_class(**algorithm_kwargs)
     model.learn(**learn_kwargs)
 
+    env.close()
+
 
 def filename(m):
     return m.replace('models', 'eval').replace('zip', 'pickle')
