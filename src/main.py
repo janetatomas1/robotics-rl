@@ -15,5 +15,5 @@ if __name__ == "__main__":
         f.write("branch: {}\n".format(repo.active_branch.name))
         f.write("commit: {}\n".format(repo.head.object.hexsha))
 
-    # train()
+    train()
     evaluate()
