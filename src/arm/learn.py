@@ -9,7 +9,7 @@ import os
 import json
 import glob
 
-from src.logger import CSVLogger, BinaryLogger
+from src.logger import CSVLogger
 from src.arm.envs import PandaEnv
 from src.callback import CustomCallback
 
@@ -33,7 +33,7 @@ eval_runs = 10
 
 
 def get_env(train):
-    env = PandaEnv(**env_kwargs, save_history=train, logger_class=CSVLogger if train else BinaryLogger)
+    env = PandaEnv(**env_kwargs, save_history=train, logger_class=CSVLogger)
     env.set_control_loop(False)
     return env
 
@@ -112,14 +112,14 @@ def evaluate_model(env, model_file, positions, log_file):
 
             env.clear_history()
 
-        env.save_history(
+        env.save_history(history=dict(
             distance=cost,
             tip_distance=tip_cost,
             success=success,
             id_=p['id_'],
             steps=steps,
             collisions=collisions,
-        )
+        ))
 
     logger.close()
 
