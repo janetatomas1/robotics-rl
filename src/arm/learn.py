@@ -9,7 +9,7 @@ import os
 import json
 import glob
 
-from src.logger import CSVLogger
+from src.logger import CSVLogger, BinaryLogger
 from src.arm.envs import PandaEnv
 from src.callback import CustomCallback
 
@@ -25,22 +25,22 @@ env_kwargs = {
     "target_low": [0.8, -0.2, 1.0],
     "target_high": [1.0, 0.2, 1.4],
     "reset_actions": 5,
-    "logger_class": CSVLogger,
     "dynamic_obstacles": False,
 }
 
 algorithm_class = TD3
+eval_runs = 10
 
 
-def get_env():
-    env = PandaEnv(**env_kwargs)
+def get_env(train):
+    env = PandaEnv(**env_kwargs, save_history=train, logger_class=CSVLogger if train else BinaryLogger)
     env.set_control_loop(False)
     return env
 
 
 def train():
     torch.set_num_threads(1)
-    env = get_env()
+    env = get_env(True)
 
     callback_kwargs = {
         "n_steps": 10000,
@@ -84,25 +84,41 @@ def evaluate_model(env, model_file, positions, log_file):
     logger.open(log_file)
 
     for p in positions:
-        env.empty_move()
-        env.set_reset_joint_values(p['joints'])
-        env.reset_joint_values()
-        env.get_target().set_position(p['target_pos'])
 
-        obs = env.get_state()
-        done = False
+        cost = list()
+        tip_cost = list()
+        success = list()
+        steps = list()
+        collisions = list()
 
-        while not done:
-            action, _ = model.predict(obs)
-            obs, _, done, _ = env.step(action)
+        for i in range(eval_runs):
+            env.empty_move()
+            env.set_reset_joint_values(p['joints'])
+            env.reset_joint_values()
+            env.get_target().set_position(p['target_pos'])
+
+            obs = env.get_state()
+            done = False
+
+            while not done:
+                action, _ = model.predict(obs, deterministic=False)
+                obs, _, done, _ = env.step(action)
+
+            cost.append(env.path_cost())
+            tip_cost.append(env.tip_path_cost())
+            success.append(env.is_close())
+            steps.append(env.get_steps())
+            collisions.append(env.get_collision_count())
+
+            env.clear_history()
 
         env.save_history(
-            distance=env.path_cost(),
-            tip_distance=env.tip_path_cost(),
-            success=env.is_close(),
+            distance=cost,
+            tip_distance=tip_cost,
+            success=success,
             id_=p['id_'],
-            steps=env.get_steps(),
-            collision_count=env.get_collision_count(),
+            steps=steps,
+            collisions=collisions,
         )
 
     logger.close()
@@ -116,7 +132,7 @@ def evaluate():
 
     torch.set_num_threads(1)
 
-    env = get_env()
+    env = get_env(False)
 
     saved_models = glob.glob('/opt/results/models/*.zip')
 

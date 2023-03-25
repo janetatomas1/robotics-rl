@@ -33,6 +33,7 @@ class RobotEnv(Env):
                  failure_reward=-5,
                  step_failure_reward=-1,
                  normalization_exponent=1.5,
+                 save_history=True,
                  ):
         self._threshold = threshold
         self._log_file = log_file
@@ -90,6 +91,7 @@ class RobotEnv(Env):
         self._failure_reward = failure_reward
         self._step_failure_reward = step_failure_reward
         self._normalization_exponent = normalization_exponent
+        self._save_history = save_history
 
     def reset_robot(self):
         self._pyrep.set_configuration_tree(self._initial_robot_state)
@@ -195,23 +197,23 @@ class RobotEnv(Env):
 
         self.move(action)
         done = self.is_done()
-        close = self.is_close()
         reward = self._reward_fn()
         info = self.info()
 
         if done:
             self.update_history()
 
-        if done and self._log_file is not None:
-            if len(info) > 0:
-                self.save_history(
-                    rewards=self._rewards,
-                    info={'info': info}
-                )
-            else:
-                self.save_history(
-                    rewards=self._rewards,
-                )
+        if self._save_history:
+            if done and self._log_file is not None:
+                if len(info) > 0:
+                    self.save_history(
+                        rewards=self._rewards,
+                        info={'info': info}
+                    )
+                else:
+                    self.save_history(
+                        rewards=self._rewards,
+                    )
 
         return self.get_state(), reward, done, info
 
