@@ -138,6 +138,18 @@ class RobotEnv(Env):
 
         return self._step_failure_reward + punishment
 
+    def square_boosted_sparse_reward(self):
+        done = self.is_done()
+        close = self.is_close()
+        punishment = self._collision_reward if self.check_collision() else 0
+
+        if close:
+            return max(self.reward_boost() + punishment, 0) ** 2
+        elif done:
+            return self._failure_reward + punishment
+
+        return self._step_failure_reward + punishment
+
     def normalized_punishment(self):
         return 1
 
