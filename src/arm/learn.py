@@ -32,8 +32,8 @@ algorithm_class = TD3
 eval_runs = 10
 
 
-def get_env(train):
-    env = PandaEnv(**env_kwargs, save_history=train)
+def get_env(training):
+    env = PandaEnv(**env_kwargs, save_history=training)
     env.set_control_loop(False)
     return env
 
