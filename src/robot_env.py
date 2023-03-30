@@ -5,7 +5,7 @@ from pyrep.objects.shape import Shape
 import numpy as np
 
 from src.utils import distance
-from src.logger import BinaryLogger
+from src.logger import JsonLogger
 
 
 class RobotEnv(Env):
@@ -20,7 +20,7 @@ class RobotEnv(Env):
                  threshold=0.1,
                  episode_length=50,
                  headless=False,
-                 logger_class=BinaryLogger,
+                 logger_class=JsonLogger,
                  reward_fn='sparse_reward',
                  dynamic_obstacles=False,
                  obstacles_low=None,

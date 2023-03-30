@@ -1,5 +1,5 @@
 import csv
-import pickle
+import json
 
 
 class Logger:
@@ -19,12 +19,12 @@ class Logger:
         self._file = open(self._path, self._file_mode)
 
 
-class BinaryLogger(Logger):
+class JsonLogger(Logger):
     def __init__(self):
-        super().__init__("wb")
+        super().__init__("w")
 
     def save_history(self, **kwargs):
-        pickle.dump(kwargs, self._file)
+        self._file.write(f'{json.dumps(kwargs)}')
         self._file.flush()
 
 

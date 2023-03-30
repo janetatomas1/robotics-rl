@@ -20,7 +20,7 @@ env_kwargs = {
     "scene": str(scene),
     "headless": False,
     "episode_length": 50,
-    "log_file": "/opt/results/values.csv",
+    "log_file": "/opt/results/values.json",
     "reward_fn": "boosted_sparse_reward",
     "target_low": [0.8, -0.2, 1.0],
     "target_high": [1.0, 0.2, 1.4],
@@ -33,7 +33,7 @@ eval_runs = 10
 
 
 def get_env(train):
-    env = PandaEnv(**env_kwargs, save_history=train, logger_class=CSVLogger)
+    env = PandaEnv(**env_kwargs, save_history=train)
     env.set_control_loop(False)
     return env
 
@@ -74,7 +74,7 @@ def train():
 
 
 def filename(m):
-    return m.replace('models', 'eval').replace('zip', 'pickle')
+    return m.replace('models', 'eval').replace('zip', 'json')
 
 
 def evaluate_model(env, model_file, positions, log_file):
