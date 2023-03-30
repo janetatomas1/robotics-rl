@@ -13,7 +13,7 @@ from .envs import (
 import math
 import threading
 
-from multiprocessing.managers import SharedMemoryManager
+from pyrep.const import ConfigurationPathAlgorithms
 from multiprocessing.shared_memory import SharedMemory
 
 
@@ -100,7 +100,8 @@ def find_path_process(id_):
                 path = None
 
                 try:
-                    path = env.find_path_for_euler_angles(euler=[roll, yaw, pitch])
+                    path = env.find_path_for_euler_angles(euler=[roll, yaw, pitch],
+                                                          algorithm=ConfigurationPathAlgorithms.RRT)
                     should_restart = True
                 except ConfigurationPathError:
                     should_restart = False
