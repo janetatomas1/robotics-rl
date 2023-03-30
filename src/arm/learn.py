@@ -109,7 +109,6 @@ def evaluate_model(env, model_file, positions, log_file):
             success.append(env.is_close())
             steps.append(env.get_steps())
             collisions.append(env.get_collision_count())
-
             env.clear_history()
 
         env.save_history(history=dict(

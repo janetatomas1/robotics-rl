@@ -120,7 +120,7 @@ class RobotEnv(Env):
         punishment = self._collision_reward if self.check_collision() else 0
 
         if close:
-            return self.reward_boost() + punishment
+            return self._success_reward - self.path_cost() + punishment
         elif done:
             return self._failure_reward + punishment
 
@@ -144,7 +144,7 @@ class RobotEnv(Env):
         punishment = self._collision_reward if self.check_collision() else 0
 
         if close:
-            return max(self.reward_boost() + punishment, 0) ** 2
+            return max(self.boosted_sparse_reward() + punishment, 0) ** 2
         elif done:
             return self._failure_reward + punishment
 
@@ -155,9 +155,6 @@ class RobotEnv(Env):
 
     def path_cost(self):
         return distance(self._path)
-
-    def reward_boost(self):
-        return self._boosted_reward - distance(self._path)
 
     def reset(self):
         self.reset_robot()

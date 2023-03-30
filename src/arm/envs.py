@@ -12,7 +12,7 @@ from pyrep.robots.arms.lbr_iiwa_14_r820 import LBRIwaa14R820
 from pyrep.const import ConfigurationPathAlgorithms
 
 from src.robot_env import RobotEnv
-from src.utils import distance
+from src.utils import distance, angle_distance
 
 
 class ArmEnv(RobotEnv):
@@ -26,6 +26,7 @@ class ArmEnv(RobotEnv):
         self._nreset_actions = reset_actions
         self._reset_actions = list()
         self._tip_path = list()
+        self._quaternion_history = list()
 
         _, joint_intervals = self._robot.get_joint_intervals()
 
@@ -67,6 +68,7 @@ class ArmEnv(RobotEnv):
         super().update_history()
         self._path.append(self.get_joint_values())
         self._tip_path.append(self.get_robot().get_tip().get_position())
+        self._quaternion_history.append(self.get_robot().get_tip().get_quaternion())
 
     def set_control_loop(self, value):
         self._control_loop = value
@@ -128,9 +130,6 @@ class ArmEnv(RobotEnv):
     def is_close(self):
         return bool(self.distance() <= self._threshold)
 
-    def reward_boost(self):
-        return self._boosted_reward - distance(self.get_path())
-
     def info(self):
         return {
             'path_cost': self.path_cost(),
@@ -191,14 +190,58 @@ class ArmEnv(RobotEnv):
         punishment = self._collision_reward if self.check_collision() else 0
 
         if close:
-            return self.tip_reward_boost() + punishment
+            return self._boosted_reward - self.tip_path_cost() + punishment
         elif done:
             return self._failure_reward + punishment
 
         return self._step_failure_reward + punishment
 
-    def tip_reward_boost(self):
-        return self._boosted_reward - self.tip_path_cost()
+    def quaternion_angle_boosted_sparse_reward(self):
+        done = self.is_done()
+        close = self.is_close()
+        punishment = self._collision_reward if self.check_collision() else 0
+
+        if close:
+            return self._boosted_reward - self.quaternion_angle_cost() + punishment
+        elif done:
+            return self._failure_reward + punishment
+
+        return self._step_failure_reward + punishment
+
+    def joint_path_angle_boosted_sparse_reward(self):
+        done = self.is_done()
+        close = self.is_close()
+        punishment = self._collision_reward if self.check_collision() else 0
+
+        if close:
+            return self._boosted_reward - self.joint_path_angle_cost() + punishment
+        elif done:
+            return self._failure_reward + punishment
+
+        return self._step_failure_reward + punishment
+
+    def average_joint_angle_boosted_sparse_reward(self):
+        done = self.is_done()
+        close = self.is_close()
+        punishment = self._collision_reward if self.check_collision() else 0
+
+        if close:
+            return self._boosted_reward - self.average_joint_angle_boosted_sparse_reward() + punishment
+        elif done:
+            return self._failure_reward + punishment
+
+        return self._step_failure_reward + punishment
+
+    def quaternion_angle_cost(self):
+        return angle_distance(self._quaternion_history)
+
+    def joint_path_angle_cost(self):
+        return angle_distance(self.get_path())
+
+    def average_joint_path_angle_cost(self):
+        steps = self.get_steps()
+        steps = steps if steps > 0 else 1
+        return angle_distance(self.get_path()) / steps
 
 
 class PandaEnv(ArmEnv):
