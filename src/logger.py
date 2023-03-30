@@ -24,7 +24,7 @@ class JsonLogger(Logger):
         super().__init__("w")
 
     def save_history(self, **kwargs):
-        self._file.write(f'{json.dumps(kwargs)}')
+        self._file.write(f'{json.dumps(kwargs)}\n')
         self._file.flush()
 
 
