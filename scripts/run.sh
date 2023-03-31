@@ -1,6 +1,6 @@
 
-command="./venv/bin/python -m src.main"
+xvfb :99 -screen 0 1024x768x24 +extension GLX +render -noreset &
 
-echo xvfb-run --server-args "-ac -screen 0, 1024x1024x24" ${command} "$@"
+export DISPLAY=:99
 
-xvfb-run --server-args "-ac -screen 0, 1024x1024x24" ${command} "$@"
+./venv/bin/python -m src.main
