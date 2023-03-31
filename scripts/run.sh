@@ -1,5 +1,5 @@
 
-xvfb-run :99 -screen 0 1024x768x24 +extension GLX +render -noreset &
+Xvfb :99 -screen 0 1024x768x24 +extension GLX +render -noreset &
 
 export DISPLAY=:99
 
