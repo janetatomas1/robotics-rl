@@ -15,23 +15,22 @@ from src.callback import CustomCallback
 
 scene = pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'scene_panda.ttt')
 
-env_kwargs = {
-    "scene": str(scene),
-    "headless": "HEADLESS" in os.environ and int(os.environ["HEADLESS"]) == 1,
-    "episode_length": 50,
-    "log_file": "/opt/results/values.json",
-    "reward_fn": "boosted_sparse_reward",
-    "target_low": [0.8, -0.2, 1.0],
-    "target_high": [1.0, 0.2, 1.4],
-    "reset_actions": 5,
-    "dynamic_obstacles": False,
-}
-
 algorithm_class = TD3
 eval_runs = 10
 
 
 def get_env(training):
+    env_kwargs = {
+        "scene": str(scene),
+        "headless": "HEADLESS" in os.environ and int(os.environ["HEADLESS"]) == 1,
+        "episode_length": 50,
+        "log_file": f"/opt/results/values{'' if training else 1}.json",
+        "reward_fn": "boosted_sparse_reward",
+        "target_low": [0.8, -0.2, 1.0],
+        "target_high": [1.0, 0.2, 1.4],
+        "reset_actions": 5,
+        "dynamic_obstacles": False,
+    }
     env = PandaEnv(**env_kwargs, save_history=training)
     env.set_control_loop(False)
     return env
