@@ -18,7 +18,7 @@ scene = pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'sce
 
 env_kwargs = {
     "scene": str(scene),
-    "headless": False,
+    "headless": True,
     "episode_length": 50,
     "log_file": "/opt/results/values.json",
     "reward_fn": "boosted_sparse_reward",

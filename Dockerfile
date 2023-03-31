@@ -41,4 +41,10 @@ COPY . .
 
 ENV VENV=/opt/robotics-rl/venv/lib/python3.10/site-packages/
 
+RUN apt update &&  apt-get install xorg libxcb-randr0-dev libxrender-dev libxkbcommon-dev libxkbcommon-x11-0 libavcodec-dev libavformat-dev libswscale-dev
+RUN apt update && nvidia-xconfig -a --use-display-device=None --virtual=1280x1024
+# Install VirtualGL
+RUN wget https://sourceforge.net/projects/virtualgl/files/2.5.2/virtualgl_2.5.2_amd64.deb/download -O virtualgl_2.5.2_amd64.deb
+RUN dpkg -i virtualgl*.deb
+
 ENTRYPOINT ["bash", "scripts/run.sh"]
