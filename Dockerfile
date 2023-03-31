@@ -40,5 +40,6 @@ RUN . venv/bin/activate && pip install git+https://github.com/stepjam/PyRep.git
 COPY . .
 
 ENV VENV=/opt/robotics-rl/venv/lib/python3.10/site-packages/
+ENV HEADLESS=1
 
 ENTRYPOINT ["bash", "scripts/run.sh"]
