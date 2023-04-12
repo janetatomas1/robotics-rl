@@ -135,13 +135,12 @@ def evaluate():
 
     env = get_env(False)
 
-    saved_models = glob.glob('/opt/results/models/*.zip')
+    saved_model = str(pathlib.Path('/opt/results/models/rl_model_500000_steps.zip'))
 
     positions_file = open('/opt/positions/positions.json')
     positions = json.load(positions_file)
     positions_file.close()
 
-    for m in saved_models:
-        evaluate_model(env, m, positions, filename(m))
+    evaluate_model(env, saved_model, positions, filename(saved_model))
 
     env.close()
