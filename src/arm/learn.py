@@ -6,7 +6,6 @@ from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 import torch.nn as nn
 import json
-import glob
 
 import os
 from src.arm.envs import PandaEnv
@@ -30,6 +29,7 @@ def get_env(training):
         "target_high": [1.0, 0.2, 1.4],
         "reset_actions": 5,
         "dynamic_obstacles": False,
+        "max_speed": 0.2,
     }
     env = PandaEnv(**env_kwargs, save_history=training)
     env.set_control_loop(False)
@@ -142,5 +142,4 @@ def evaluate():
     positions_file.close()
 
     evaluate_model(env, saved_model, positions, filename(saved_model))
-
     env.close()
