@@ -177,13 +177,6 @@ class ArmEnv(RobotEnv):
     def get_reset_joint_values(self):
         return self._reset_joint_positions
 
-    def normalized_punishment(self):
-        if len(self.get_tip_path()) < 1:
-            return self.path_cost()
-
-        return self.path_cost() / \
-            (np.linalg.norm(self.get_target().get_position() - self.get_tip_path()[0]) ** self._normalization_exponent)
-
     def tip_boosted_sparse_reward(self):
         done = self.is_done()
         close = self.is_close()

@@ -32,7 +32,6 @@ class RobotEnv(Env):
                  collision_reward=-3,
                  failure_reward=-5,
                  step_failure_reward=-1,
-                 normalization_exponent=1.5,
                  save_history=True,
                  ):
         self._threshold = threshold
@@ -90,7 +89,6 @@ class RobotEnv(Env):
         self._collision_reward = collision_reward
         self._failure_reward = failure_reward
         self._step_failure_reward = step_failure_reward
-        self._normalization_exponent = normalization_exponent
         self._save_history = save_history
 
     def reset_robot(self):
@@ -125,33 +123,6 @@ class RobotEnv(Env):
             return self._failure_reward + punishment
 
         return self._step_failure_reward + punishment
-
-    def boosted_sparse_normalized_reward(self):
-        done = self.is_done()
-        close = self.is_close()
-        punishment = self._collision_reward if self.check_collision() else 0
-
-        if close:
-            return self._boosted_reward - self.normalized_punishment() + punishment
-        elif done:
-            return self._failure_reward + punishment
-
-        return self._step_failure_reward + punishment
-
-    def square_boosted_sparse_reward(self):
-        done = self.is_done()
-        close = self.is_close()
-        punishment = self._collision_reward if self.check_collision() else 0
-
-        if close:
-            return max(self.boosted_sparse_reward() + punishment, 0) ** 2
-        elif done:
-            return self._failure_reward + punishment
-
-        return self._step_failure_reward + punishment
-
-    def normalized_punishment(self):
-        return 1
 
     def path_cost(self):
         return distance(self._path)
