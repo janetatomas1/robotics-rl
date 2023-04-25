@@ -18,7 +18,7 @@ algorithm_class = TD3
 eval_runs = 10
 
 
-def get_env(training):
+def get_env(training, speed):
     env_kwargs = {
         "scene": str(scene),
         "headless": "HEADLESS" in os.environ and int(os.environ["HEADLESS"]) == 1,
@@ -30,23 +30,16 @@ def get_env(training):
         "reset_actions": 5,
         "dynamic_obstacles": False,
         "success_reward": 20,
-        "max_speed": 0.2,
+        "max_speed": speed,
     }
     env = PandaEnv(**env_kwargs, save_history=training)
     env.set_control_loop(False)
     return env
 
 
-def train():
+def train(speed):
     torch.set_num_threads(1)
-    env = get_env(True)
-
-    callback_kwargs = {
-        "n_steps": 10000,
-        "save_path": "/opt/results/models"
-    }
-
-    callback = CustomCallback(**callback_kwargs)
+    env = get_env(True, speed)
 
     n_actions = len(env.get_joints())
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
@@ -62,13 +55,12 @@ def train():
     }
 
     learn_kwargs = {
-        "callback": callback,
-        "total_timesteps": 500000,
+        "total_timesteps": 300000,
     }
 
     model = algorithm_class(**algorithm_kwargs)
     model.learn(**learn_kwargs)
-
+    model.save('/opt/results/model/rl_model_speed{}.zip'.format(speed))
     env.close()
 
 
@@ -128,7 +120,7 @@ def evaluate_model(env, model_file, positions, log_file):
     logger.close()
 
 
-def evaluate():
+def evaluate(speed):
     path = '/opt/results/eval'
 
     if not os.path.exists(path):
@@ -136,9 +128,9 @@ def evaluate():
 
     torch.set_num_threads(1)
 
-    env = get_env(False)
+    env = get_env(False, speed)
 
-    saved_model = str(pathlib.Path('/opt/results/models/rl_model_500000_steps.zip'))
+    saved_model = str('/opt/results/model/rl_model_speed{}.zip'.format(speed))
 
     positions_file = open('/opt/positions/positions.json')
     positions = json.load(positions_file)
