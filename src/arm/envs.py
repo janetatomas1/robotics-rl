@@ -53,6 +53,11 @@ class ArmEnv(RobotEnv):
             high=np.array([max_speed for _ in self._joints])
         )
 
+        self._reset_action_space = spaces.Box(
+            low=np.array([-1 for _ in self._joints]),
+            high=np.array([1 for _ in self._joints])
+        )
+
         self._starting_joint_positions = self.get_joint_values()
         self._reset_joint_positions = self.get_joint_values()
         self._control_loop = False
@@ -85,10 +90,9 @@ class ArmEnv(RobotEnv):
     def reset(self):
         super().reset()
         self._reset_actions.clear()
-        self.get_pyrep_instance().step()
 
         for _ in range(self._nreset_actions):
-            self._reset_actions.append(self.action_space.sample())
+            self._reset_actions.append(self._reset_action_space.sample())
 
         self.play_reset_actions()
         self._reset_joint_positions = self.get_joint_values()
@@ -99,7 +103,7 @@ class ArmEnv(RobotEnv):
     def reset_robot(self):
         super().reset_robot()
         self.get_robot().set_joint_positions(self._starting_joint_positions)
-        self.get_pyrep_instance().step_ui()
+        self.get_robot().set_joint_target_positions(self._starting_joint_positions)
 
     def reset_joint_values(self):
         self.get_robot().set_joint_positions(self._reset_joint_positions)
