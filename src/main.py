@@ -15,5 +15,9 @@ if __name__ == "__main__":
         f.write("branch: {}\n".format(repo.active_branch.name))
         f.write("commit: {}\n".format(repo.head.object.hexsha))
 
-    train()
-    evaluate()
+    n = 20
+    for i in range(1, n + 1):
+        speed = i / n
+        train(speed)
+        evaluate(speed)
+        print(speed)
