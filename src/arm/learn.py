@@ -62,7 +62,7 @@ def train():
 
     learn_kwargs = {
         "callback": callback,
-        "total_timesteps": 500000,
+        "total_timesteps": 2000000,
     }
 
     model = algorithm_class(**algorithm_kwargs)
