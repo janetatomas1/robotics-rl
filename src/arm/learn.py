@@ -25,12 +25,15 @@ def get_env(training):
         "episode_length": 50,
         "log_file": f"/opt/results/values{'' if training else 1}.json",
         "reward_fn": "boosted_sparse_reward",
-        "target_low": [0.8, -0.2, 1.0],
+        "target_low": [0.8, 0.1, 1.0],
         "target_high": [1.0, 0.2, 1.4],
         "reset_actions": 5,
         "dynamic_obstacles": False,
         "success_reward": 20,
         "max_speed": 0.2,
+        "obstacles_state": [
+            [0.01, 0.9, 0.3, 0.9, 0, 0.9],
+        ],
     }
     env = PandaEnv(**env_kwargs, save_history=training)
     env.set_control_loop(False)
