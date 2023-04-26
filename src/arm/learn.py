@@ -121,6 +121,8 @@ def evaluate_model(env, model_file, positions, log_file):
             id_=p['id_'],
             steps=steps,
             collisions=collisions,
+            quaternion_angle_costs=quaternion_angle_costs,
+            path_angle_costs=path_angle_costs,
         ))
 
     logger.close()
