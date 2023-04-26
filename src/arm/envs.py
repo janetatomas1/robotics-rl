@@ -65,6 +65,7 @@ class ArmEnv(RobotEnv):
     def clear_history(self):
         super().clear_history()
         self._tip_path.clear()
+        self._quaternion_history.clear()
 
     def set_reset_actions(self, actions):
         self._reset_actions = actions
