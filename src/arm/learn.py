@@ -55,7 +55,7 @@ def train(speed):
     }
 
     learn_kwargs = {
-        "total_timesteps": 300000,
+        "total_timesteps": 200000,
     }
 
     model = algorithm_class(**algorithm_kwargs)
