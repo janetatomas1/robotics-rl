@@ -41,9 +41,6 @@ def train(speed):
     torch.set_num_threads(1)
     env = get_env(True, speed)
 
-    n_actions = len(env.get_joints())
-    action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
-
     algorithm_kwargs = {
         "env": env,
         "policy": "MlpPolicy",
@@ -51,7 +48,6 @@ def train(speed):
             "net_arch": [100, 100],
             "activation_fn": nn.Tanh,
         },
-        "action_noise": action_noise,
     }
 
     learn_kwargs = {
