@@ -3,7 +3,7 @@ cloudpickle==2.2.0
 contourpy==1.0.5
 cycler==0.11.0
 fonttools==4.37.4
-gym==0.21.0
+gym @ git+https://github.com/openai/gym.git@9180d12e1b66e7e2a1a622614f787a6ec147ac40
 kiwisolver==1.4.4
 matplotlib==3.5.3
 numpy==1.23.3
