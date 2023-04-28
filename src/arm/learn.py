@@ -30,7 +30,7 @@ def get_env(training):
         "reset_actions": 5,
         "dynamic_obstacles": False,
         "success_reward": 20,
-        "max_speed": 0.2,
+        "max_speed": 1,
         "obstacles_state": [
             [0.01, 0.9, 0.4, 0.9, 0, 0.9],
         ],
