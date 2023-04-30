@@ -22,7 +22,7 @@ def get_env(training):
     env_kwargs = {
         "scene": str(scene),
         "headless": "HEADLESS" in os.environ and int(os.environ["HEADLESS"]) == 1,
-        "episode_length": 50,
+        "episode_length": 100,
         "log_file": f"/opt/results/values{'' if training else 1}.json",
         "reward_fn": "boosted_sparse_reward",
         "target_low": [0.8, -0.2, 1.0],
@@ -30,7 +30,7 @@ def get_env(training):
         "reset_actions": 5,
         "dynamic_obstacles": False,
         "success_reward": 20,
-        "max_speed": 0.2,
+        "max_speed": 0.1,
     }
     env = PandaEnv(**env_kwargs, save_history=training)
     env.set_control_loop(False)
@@ -63,7 +63,7 @@ def train():
 
     learn_kwargs = {
         "callback": callback,
-        "total_timesteps": 500000,
+        "total_timesteps": 100000,
     }
 
     model = algorithm_class(**algorithm_kwargs)
