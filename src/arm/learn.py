@@ -86,51 +86,27 @@ def evaluate_model(env, model_file, positions, log_file):
 
     logger = env.get_logger()
     logger.open(log_file)
+    episodes = 1000
+    for i in range(episodes):
+        env.clear_history()
+        obs = env.reset()
 
-    for p in positions:
+        while not env.is_done():
+            action, _ = model.predict(obs)
+            env.step(action)
 
-        cost = list()
-        tip_cost = list()
-        success = list()
-        steps = list()
-        collisions = list()
-        quaternion_angle_costs = list()
-        path_angle_costs = list()
-
-        for i in range(eval_runs):
-            env.empty_move()
-            env.set_reset_joint_values(p['joints'])
-            env.reset_joint_values()
-            env.get_target().set_position(p['target_pos'])
-
-            obs = env.get_state()
-            done = False
-
-            while not done:
-                action, _ = model.predict(obs, deterministic=False)
-                obs, _, done, _ = env.step(action)
-
-            cost.append(env.path_cost())
-            tip_cost.append(env.tip_path_cost())
-            success.append(env.is_close())
-            steps.append(env.get_steps())
-            collisions.append(env.get_collision_count())
-            quaternion_angle_costs.append(env.quaternion_angle_cost())
-            path_angle_costs.append(env.joint_path_angle_cost())
-            env.clear_history()
 
         env.save_history(history=dict(
-            distance=cost,
-            tip_distance=tip_cost,
-            success=success,
-            id_=p['id_'],
-            steps=steps,
-            collisions=collisions,
-            quaternion_angle_costs=quaternion_angle_costs,
-            path_angle_costs=path_angle_costs,
+            rewards=env.get_rewards(),
+            cost=env.path_cost(),
+            tip_cost=env.tip_path_cost(),
+            quaternion_cost=env.quaternion_angle_cost(),
+            collisions=env.get_collision_count(),
+            steps=env.get_steps(),
         ))
 
     logger.close()
+
 
 
 def evaluate():
