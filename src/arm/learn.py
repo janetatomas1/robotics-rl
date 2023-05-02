@@ -29,6 +29,7 @@ def get_env(training):
         "target_high": [1.0, 0.2, 1.4],
         "reset_actions": 5,
         "dynamic_obstacles": False,
+        "collision_reward": -1000,
         "success_reward": 20,
         "max_speed": 0.2,
         "obstacles_state": [
