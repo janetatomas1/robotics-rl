@@ -63,7 +63,7 @@ def train():
 
     learn_kwargs = {
         "callback": callback,
-        "total_timesteps": 100000,
+        "total_timesteps": 1500000,
     }
 
     model = algorithm_class(**algorithm_kwargs)
@@ -138,7 +138,7 @@ def evaluate():
 
     env = get_env(False)
 
-    saved_model = str(pathlib.Path('/opt/results/models/rl_model_500000_steps.zip'))
+    saved_model = str(pathlib.Path('/opt/results/models/rl_model_1500000_steps.zip'))
 
     positions_file = open('/opt/positions/positions.json')
     positions = json.load(positions_file)
