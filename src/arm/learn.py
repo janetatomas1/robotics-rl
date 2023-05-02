@@ -1,7 +1,7 @@
 
 import torch
 import pathlib
-from stable_baselines3 import DDPG
+from stable_baselines3 import PPO
 from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 import torch.nn as nn
@@ -14,7 +14,7 @@ from src.callback import CustomCallback
 
 scene = pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'scene_panda.ttt')
 
-algorithm_class = DDPG
+algorithm_class = PPO
 eval_runs = 10
 
 
@@ -52,9 +52,6 @@ def train():
 
     callback = CustomCallback(**callback_kwargs)
 
-    n_actions = len(env.get_joints())
-    action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
-
     algorithm_kwargs = {
         "env": env,
         "policy": "MlpPolicy",
@@ -62,7 +59,6 @@ def train():
             "net_arch": [100, 100],
             "activation_fn": nn.Tanh,
         },
-        "action_noise": action_noise,
     }
 
     learn_kwargs = {
