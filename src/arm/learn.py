@@ -2,10 +2,13 @@
 import torch
 import pathlib
 <<<<<<< HEAD
+<<<<<<< HEAD
 from stable_baselines3 import DDPG
 =======
 from stable_baselines3 import SAC
 >>>>>>> c3e8310 (SAC)
+=======
+from stable_baselines3 import DDPG
 from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 import torch.nn as nn
