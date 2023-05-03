@@ -32,7 +32,7 @@ def get_env(training):
         "success_reward": 20,
         "max_speed": 0.2,
         "obstacles_state": [
-            [0.01, 0.9, 0.4, 0.9, 0, 0.9],
+            [0.01, 0.9, 0.4, 0.8, 0, 0.9],
         ],
     }
     env = PandaEnv(**env_kwargs, save_history=training)
