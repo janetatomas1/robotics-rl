@@ -1,13 +1,8 @@
 
 import torch
 import pathlib
-<<<<<<< HEAD
-<<<<<<< HEAD
-from stable_baselines3 import DDPG
-=======
+from stable_baselines3 import TD3
 from stable_baselines3 import SAC
->>>>>>> c3e8310 (SAC)
-=======
 from stable_baselines3 import DDPG
 from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
@@ -21,7 +16,7 @@ from src.callback import CustomCallback
 
 scene = pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'scene_panda.ttt')
 
-algorithm_class = DDPG
+algorithm_class = TD3
 eval_runs = 10
 
 
