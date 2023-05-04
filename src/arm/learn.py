@@ -16,7 +16,7 @@ from src.callback import CustomCallback
 
 scene = pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'scene_panda.ttt')
 
-algorithm_class = TD3
+algorithm_class = DDPG
 eval_runs = 10
 
 
