@@ -35,10 +35,12 @@ def get_env(training):
         "max_speed": 0.2,
         "collision_reward": -1000,
         "obstacles_low": [
-            [0.01, 0.8, 0.01, 0.7, 0, 0.7],
+            [0.1, 0.1, 0.7, 0.3, -0.4, 0.8],
+            [0.1, 0.1, 0.7, 0.3, 0, 0.8],
         ],
         "obstacles_high": [
-            [0.01, 0.9, 0.02, 0.8, 0.1, 1.5],
+            [0.1, 0.1, 1.3, 0.4, 0, 0.8],
+            [0.1, 0.1, 1.3, 0.4, 0.4, 0.8],
         ],
     }
     env = PandaEnv(**env_kwargs, save_history=training)
