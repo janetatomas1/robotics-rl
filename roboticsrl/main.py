@@ -81,7 +81,6 @@ def evaluate_model_with_positions(env, model_file, positions, log_file):
         steps = list()
         collisions = list()
         quaternion_angle_costs = list()
-        path_angle_costs = list()
 
         for i in range(eval_runs):
             env.empty_move()
@@ -102,7 +101,6 @@ def evaluate_model_with_positions(env, model_file, positions, log_file):
             steps.append(env.get_steps())
             collisions.append(env.get_collision_count())
             quaternion_angle_costs.append(env.quaternion_angle_cost())
-            path_angle_costs.append(env.joint_path_angle_cost())
             env.clear_history()
 
         env.save_history(history=dict(
@@ -113,7 +111,6 @@ def evaluate_model_with_positions(env, model_file, positions, log_file):
             steps=steps,
             collisions=collisions,
             quaternion_angle_costs=quaternion_angle_costs,
-            path_angle_costs=path_angle_costs,
         ))
 
     logger.close()
