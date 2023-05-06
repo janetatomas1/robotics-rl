@@ -11,4 +11,4 @@ from roboticsrl.arm_env import (
     LBRIwaa7R800Env,
     LBRIwaa14R820Env,
 )
-import utils
+import roboticsrl.utils as utils

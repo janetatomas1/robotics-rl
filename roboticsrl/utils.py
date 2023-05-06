@@ -6,7 +6,7 @@ def distance(v):
 
 
 def angle(u, v):
-    return np.arccos(np.dot(u, v) / (np.linalg.norm(u), np.linalg.norm(v)))
+    return np.arccos(np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v)))
 
 
 def angle_distance(v):

@@ -60,7 +60,7 @@ class ArmEnv(RobotEnv):
 
         self._starting_joint_positions = self.get_joint_values()
         self._reset_joint_positions = self.get_joint_values()
-        self._control_loop = False
+        self.set_control_loop(False)
 
     def clear_history(self):
         super().clear_history()
@@ -137,6 +137,7 @@ class ArmEnv(RobotEnv):
 
     def info(self):
         return {
+            **super().info(),
             'path_cost': self.path_cost(),
             'tip_path_cost': self.tip_path_cost(),
             'collision_count': self._collision_count,
