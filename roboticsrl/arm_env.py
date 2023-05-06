@@ -11,8 +11,8 @@ from pyrep.robots.arms.lbr_iiwa_7_r800 import LBRIwaa7R800
 from pyrep.robots.arms.lbr_iiwa_14_r820 import LBRIwaa14R820
 from pyrep.const import ConfigurationPathAlgorithms
 
-from src.robot_env import RobotEnv
-from src.utils import distance, angle_distance
+from roboticsrl.robot_env import RobotEnv
+from roboticsrl.utils import distance, angle_distance
 
 
 class ArmEnv(RobotEnv):

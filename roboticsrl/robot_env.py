@@ -4,8 +4,8 @@ from pyrep.const import PrimitiveShape
 from pyrep.objects.shape import Shape
 import numpy as np
 
-from src.utils import distance
-from src.logger import JsonLogger
+from roboticsrl.utils import distance
+from roboticsrl.logger import JsonLogger
 
 
 class RobotEnv(Env):

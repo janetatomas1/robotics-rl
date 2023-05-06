@@ -1,4 +1,3 @@
-import csv
 import json
 
 
@@ -25,25 +24,4 @@ class JsonLogger(Logger):
 
     def save_history(self, **kwargs):
         self._file.write(f'{json.dumps(kwargs)}\n')
-        self._file.flush()
-
-
-class CSVLogger(Logger):
-    def __init__(self):
-        super().__init__("w")
-        self._writer = None
-
-    def open(self, path):
-        super().open(path)
-        self._writer = csv.writer(self._file)
-
-    def save_history(self, **kwargs):
-        row = list()
-        for _, x in list(kwargs.items()):
-            if type(x) == list:
-                row += x
-            else:
-                row.append(x)
-
-        self._writer.writerow(row)
         self._file.flush()

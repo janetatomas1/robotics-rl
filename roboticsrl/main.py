@@ -1,4 +1,5 @@
 
+import git
 import torch
 import pathlib
 from stable_baselines3 import TD3
@@ -6,13 +7,12 @@ from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 import torch.nn as nn
 import json
-
 import os
-from src.arm.envs import PandaEnv
-from src.callback import CustomCallback
+from roboticsrl.arm_env import PandaEnv
+from roboticsrl.callback import CustomCallback
 
 
-scene = pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'scene_panda.ttt')
+scene = pathlib.Path(pathlib.Path(__file__).parent.parent, 'scenes', 'scene_panda.ttt')
 
 algorithm_class = TD3
 eval_runs = 10
@@ -146,3 +146,15 @@ def evaluate():
 
     evaluate_model(env, saved_model, positions, filename(saved_model))
     env.close()
+
+
+if __name__ == "__main__":
+    venv_path = os.environ["VENV"]
+
+    with open("/opt/results/git.txt", 'w') as f:
+        repo = git.Repo(search_parent_directories=True)
+        f.write("branch: {}\n".format(repo.active_branch.name))
+        f.write("commit: {}\n".format(repo.head.object.hexsha))
+
+    train()
+    evaluate()

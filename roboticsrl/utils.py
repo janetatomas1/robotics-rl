@@ -10,4 +10,4 @@ def angle(u, v):
 
 
 def angle_distance(v):
-    return sum([np.linalg.norm(v[i] - v[i-1]) for i in range(1, len(v))])
+    return sum([angle(v[i], v[i-1]) for i in range(1, len(v))])

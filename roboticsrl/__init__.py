@@ -1,5 +1,6 @@
 
-from .envs import (
+from roboticsrl.robot_env import RobotEnv
+from roboticsrl.arm_env import (
     ArmEnv,
     PandaEnv,
     MicoEnv,
@@ -10,4 +11,4 @@ from .envs import (
     LBRIwaa7R800Env,
     LBRIwaa14R820Env,
 )
-from src.arm.learn import train
+import utils
