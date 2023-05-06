@@ -11,7 +11,8 @@ class Logger:
         pass
 
     def close(self):
-        self._file.close()
+        if self._file is not None:
+            self._file.close()
 
     def open(self, path):
         self._path = path
