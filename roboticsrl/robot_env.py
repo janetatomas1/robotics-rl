@@ -9,7 +9,7 @@ from roboticsrl.logger import JsonLogger
 
 
 class RobotEnv(Env):
-
+    """Generic class for RL environments supporting any robot form Pyrep"""
     def __init__(self,
                  scene,
                  target_low,
@@ -19,19 +19,37 @@ class RobotEnv(Env):
                  threshold=0.1,
                  episode_length=50,
                  headless=False,
-                 logger_class=JsonLogger,
-                 reward_fn='sparse_reward',
+                 reward_fn='const_sparse_reward',
                  dynamic_obstacles=False,
                  obstacles_low=None,
                  obstacles_high=None,
                  obstacles_state=None,
                  obstacles_type=PrimitiveShape.CUBOID,
-                 boosted_reward=20,
                  success_reward=2,
                  collision_reward=-3,
                  failure_reward=-5,
                  step_failure_reward=-1,
                  ):
+        """
+        Parameters:
+            scene: path to CoppeliaSim scene file
+            target_low: lower boundary of the space containing the target
+            target_high: upper boundary of the space containing the target
+            robot_class: class of the robot from the Pyrep library
+            threshold: maximal distance of the gripper from the target, to consider the episode suceesful
+            episode_length: number of steps in an episode
+            headless: headless mode
+            reward_fn: a string representing reward function method
+            dynamic_obstacles: boolean, detrmining if obstacles should be regenerated after each episode
+            obstacles_low: lower boundary of the obstacle state space
+            obstacles_high: upper boundary of the obstacle state space
+            obstacles_state: obstacle state, used only with static obstacles
+            obstacles_type: type of obstacles (SPHERE, CUBOID, CYLINDER,...)
+            success_reward: reward returned in th case of a success,
+            collision_reward: punishment reward, added in the case of a collision,
+            failure_reward: reward returned after unsuccessful episode,
+            step_failure_reward: reward returned after unsuccessful step,
+        """
         self._threshold = threshold
         self._log_file = log_file
         self._episode_length = episode_length
@@ -72,26 +90,27 @@ class RobotEnv(Env):
         for o in self._obstacles:
             o.set_collidable(True)
 
-        self._logger = logger_class()
+        self._logger = JsonLogger()
 
         if self._log_file is not None:
             self._logger.open(self._log_file)
 
         self._path = list()
 
-        self._boosted_reward = boosted_reward
         self._success_reward = success_reward
         self._collision_reward = collision_reward
         self._failure_reward = failure_reward
         self._step_failure_reward = step_failure_reward
 
     def reset_robot(self):
+        """Resets the state of the robot to back to the initial"""
         self._pyrep.set_configuration_tree(self._initial_robot_state)
 
     def move(self, action):
+        """Performs the action logic"""
         pass
 
-    def sparse_reward(self):
+    def const_sparse_reward(self):
         close = self.is_close()
         done = self.is_done()
         punishment = self._collision_reward if self.check_collision() else 0
@@ -103,10 +122,7 @@ class RobotEnv(Env):
 
         return self._step_failure_reward + punishment
 
-    def simple_reward(self):
-        return -self.distance()
-
-    def boosted_sparse_reward(self):
+    def joint_sparse_reward(self):
         done = self.is_done()
         close = self.is_close()
         punishment = self._collision_reward if self.check_collision() else 0
@@ -122,6 +138,7 @@ class RobotEnv(Env):
         return distance(self._path)
 
     def reset(self):
+        """Performs the base reset logic"""
         self.reset_robot()
         self.reset_target()
         self.clear_history()
@@ -133,12 +150,14 @@ class RobotEnv(Env):
         return self.get_state()
 
     def render(self, mode="human"):
-        pass
+        self._pyrep.step_ui()
 
     def distance(self):
+        """Should return the current distance to the target"""
         return 0
 
     def get_state(self):
+        """Should return current state of the environment"""
         pass
 
     def get_robot(self):
@@ -148,6 +167,7 @@ class RobotEnv(Env):
         return self._target
 
     def is_close(self):
+        "Should return whether the target has been reached"
         return bool(self.distance() <= self._threshold)
 
     def is_done(self):
@@ -166,6 +186,7 @@ class RobotEnv(Env):
         self._rewards.append(self._reward_fn())
 
     def step(self, action):
+        """Performs the step logic"""
         self._steps += 1
         self.update_history()
 
@@ -209,6 +230,7 @@ class RobotEnv(Env):
         return self._obstacles
 
     def check_collision(self):
+        """Return whether collision has occurred"""
         return False
 
     def clear_obstacles(self):
@@ -216,6 +238,7 @@ class RobotEnv(Env):
             o.remove()
 
     def create_obstacles(self):
+        """Generates new obstacles"""
         if self._dynamic_obstacles:
             self._obstacles_state = np.random.uniform(self._obstacles_low, self._obstacles_high)
 

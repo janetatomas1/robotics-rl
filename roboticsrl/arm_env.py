@@ -16,11 +16,19 @@ from roboticsrl.utils import distance, angle_distance
 
 
 class ArmEnv(RobotEnv):
-    def __init__(self,
-                 reset_actions=5,
-                 joints=None,
-                 max_speed=1,
-                 **kwargs):
+    """Base class for all Robotic Arm environments"""
+    def __init__(
+            self,
+            reset_actions=5,
+            joints=None,
+            max_speed=1,
+            **kwargs):
+        """
+        Parameters:
+            reset_actions: the number of random actions to use when resetting the robot
+            joints: selection of joints to use (all by default)
+            max_speed: maximal joint velocity to be used during the training
+        """
         super().__init__(**kwargs)
         self._joints = joints if joints is not None else [i for i in range(len(self._robot.joints))]
         self._nreset_actions = reset_actions
@@ -165,30 +173,29 @@ class ArmEnv(RobotEnv):
     def get_reset_joint_values(self):
         return self._reset_joint_positions
 
-    def tip_boosted_sparse_reward(self):
+    def cartesian_sparse_reward(self):
         done = self.is_done()
         close = self.is_close()
         punishment = self._collision_reward if self.check_collision() else 0
 
         if close:
-            return self._boosted_reward - self.tip_path_cost() + punishment
+            return self._success_reward - self.tip_path_cost() + punishment
         elif done:
             return self._failure_reward + punishment
 
         return self._step_failure_reward + punishment
 
-    def quaternion_angle_boosted_sparse_reward(self):
+    def orientation_sparse_reward(self):
         done = self.is_done()
         close = self.is_close()
         punishment = self._collision_reward if self.check_collision() else 0
 
         if close:
-            return self._boosted_reward - self.quaternion_angle_cost() + punishment
+            return self._success_reward - self.quaternion_angle_cost() + punishment
         elif done:
             return self._failure_reward + punishment
 
         return self._step_failure_reward + punishment
-
 
     def quaternion_angle_cost(self):
         return angle_distance(self._quaternion_history)

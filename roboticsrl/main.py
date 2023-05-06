@@ -29,7 +29,7 @@ env_kwargs = {
     "scene": str(scene),
     "headless": "HEADLESS" in os.environ and int(os.environ["HEADLESS"]) == 1,
     "episode_length": 50,
-    "reward_fn": "boosted_sparse_reward",
+    "reward_fn": "joint_sparse_reward",
     "target_low": [0.8, -0.2, 1.0],
     "target_high": [1.0, 0.2, 1.4],
     "reset_actions": 5,
