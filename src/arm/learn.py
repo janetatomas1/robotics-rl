@@ -27,7 +27,7 @@ def get_env(training):
         "episode_length": 50,
         "log_file": f"/opt/results/values{'' if training else 1}.json",
         "reward_fn": "boosted_sparse_reward",
-        "target_low": [0.92, 0.1, 0.7],
+        "target_low": [0.92, 0.1, 0.8],
         "target_high": [1.2, 0.3, 1.2],
         "reset_actions": 5,
         "dynamic_obstacles": False,
@@ -35,7 +35,7 @@ def get_env(training):
         "max_speed": 0.2,
         "collision_reward": -1000,
         "obstacles_state": [
-            [0.01, 0.9, 0.4, 0.8, 0, 0.9],
+            [0.01, 0.9, 0.25, 0.8, 0, 0.9],
         ],
     }
     env = PandaEnv(**env_kwargs, save_history=training)
@@ -87,7 +87,7 @@ def evaluate_model(env, model_file, positions, log_file):
 
     logger = env.get_logger()
     logger.open(log_file)
-    episodes = 1000
+    episodes = 10000
     for i in range(episodes):
         env.clear_history()
         obs = env.reset()
@@ -96,7 +96,6 @@ def evaluate_model(env, model_file, positions, log_file):
             action, _ = model.predict(obs)
             env.step(action)
 
-
         env.save_history(history=dict(
             rewards=env.get_rewards(),
             cost=env.path_cost(),
@@ -104,6 +103,7 @@ def evaluate_model(env, model_file, positions, log_file):
             quaternion_cost=env.quaternion_angle_cost(),
             collisions=env.get_collision_count(),
             steps=env.get_steps(),
+            succes=env.is_close(),
         ))
 
     logger.close()
