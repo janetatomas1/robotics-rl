@@ -11,7 +11,6 @@ def main():
     container_name = ''.join(random.sample(string.ascii_lowercase + string.digits, 20))
 
     results_path = "{}/results/{}".format(home_dir, container_name)
-    positions_path = "{}/positions".format(home_dir)
 
     container = client.containers.run(
         image="thesis-image",
@@ -19,7 +18,6 @@ def main():
         name=container_name,
         volumes={
             results_path: {"bind": "/opt/results/", "mode": "rw"},
-            positions_path: {"bind": "/opt/positions/", "mode": "rw"},
         }
     )
     print(container.id)
