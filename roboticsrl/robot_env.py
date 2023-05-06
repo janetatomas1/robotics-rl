@@ -15,7 +15,6 @@ class RobotEnv(Env):
                  target_low,
                  target_high,
                  robot_class=None,
-                 pr=None,
                  log_file=None,
                  threshold=0.1,
                  episode_length=50,
@@ -58,12 +57,9 @@ class RobotEnv(Env):
         self._rewards = list()
         self._reward_fn = getattr(self, reward_fn)
 
-        if pr is None:
-            self._pyrep = PyRep()
-            self._pyrep.launch(scene_file=self._scene, headless=headless)
-            self._pyrep.start()
-        else:
-            self._pyrep = pr
+        self._pyrep = PyRep()
+        self._pyrep.launch(scene_file=self._scene, headless=headless)
+        self._pyrep.start()
 
         if robot_class is not None:
             self._robot = robot_class()

@@ -153,24 +153,6 @@ class ArmEnv(RobotEnv):
     def tip_path_cost(self):
         return distance(self.get_tip_path())
 
-    def find_path_for_euler_angles(
-            self,
-            euler,
-            trials=1,
-            max_configs=1,
-            max_time_ms=1,
-            algorithm=ConfigurationPathAlgorithms.PRM,
-    ):
-        return self.get_robot().get_path(
-            position=self.get_target().get_position(),
-            euler=euler,
-            trials=trials,
-            max_configs=max_configs,
-            max_time_ms=max_time_ms,
-            algorithm=algorithm,
-            distance_threshold=self._threshold,
-        )
-
     def check_collision(self):
         return any([self.get_robot().check_arm_collision(o) for o in self.get_obstacles()])
 
@@ -207,40 +189,9 @@ class ArmEnv(RobotEnv):
 
         return self._step_failure_reward + punishment
 
-    def joint_path_angle_boosted_sparse_reward(self):
-        done = self.is_done()
-        close = self.is_close()
-        punishment = self._collision_reward if self.check_collision() else 0
-
-        if close:
-            return self._boosted_reward - self.joint_path_angle_cost() + punishment
-        elif done:
-            return self._failure_reward + punishment
-
-        return self._step_failure_reward + punishment
-
-    def average_joint_angle_boosted_sparse_reward(self):
-        done = self.is_done()
-        close = self.is_close()
-        punishment = self._collision_reward if self.check_collision() else 0
-
-        if close:
-            return self._boosted_reward - self.average_joint_angle_boosted_sparse_reward() + punishment
-        elif done:
-            return self._failure_reward + punishment
-
-        return self._step_failure_reward + punishment
 
     def quaternion_angle_cost(self):
         return angle_distance(self._quaternion_history)
-
-    def joint_path_angle_cost(self):
-        return angle_distance(self.get_path())
-
-    def average_joint_path_angle_cost(self):
-        steps = self.get_steps()
-        steps = steps if steps > 0 else 1
-        return angle_distance(self.get_path()) / steps
 
 
 class PandaEnv(ArmEnv):
