@@ -31,6 +31,9 @@ def get_env(training):
         "dynamic_obstacles": False,
         "success_reward": 20,
         "max_speed": 0.2,
+        "obstacles_state": [
+            [0.3, 0.3, 0.3, 1.0, 0, 0.9],
+        ],
     }
     env = PandaEnv(**env_kwargs, save_history=training)
     env.set_control_loop(False)
