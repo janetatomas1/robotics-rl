@@ -1,7 +1,7 @@
 
 import torch
 import pathlib
-from stable_baselines3 import SAC
+from stable_baselines3 import DDPG
 from stable_baselines3.common.noise import NormalActionNoise
 import numpy as np
 import torch.nn as nn
@@ -14,7 +14,7 @@ from src.callback import CustomCallback
 
 scene = pathlib.Path(pathlib.Path(__file__).parent.parent.parent, 'scenes', 'scene_panda.ttt')
 
-algorithm_class = SAC
+algorithm_class = DDPG
 eval_runs = 10
 
 
