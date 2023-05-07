@@ -27,16 +27,16 @@ def get_env(training):
         "headless": "HEADLESS" in os.environ and int(os.environ["HEADLESS"]) == 1,
         "episode_length": 50,
         "log_file": f"/opt/results/values{'' if training else 1}.json",
-        "reward_fn": "boosted_sparse_reward",
+        "reward_fn": "sparse_reward",
         "target_low": [0.92, 0.1, 0.8],
         "target_high": [1.2, 0.3, 1.2],
         "reset_actions": 5,
         "dynamic_obstacles": False,
         "success_reward": 20,
-        "max_speed": 0.2,
+        "max_speed": 1,
         "collision_reward": -1000,
         "obstacles_state": [
-            [0.01, 0.9, 0.25, 0.8, 0, 0.9],
+            [0.01, 0.9, 0.15, 0.8, 0, 0.9],
         ],
     }
     env = PandaEnv(**env_kwargs, save_history=training)
