@@ -67,14 +67,12 @@ def filename(m):
     return m.replace('zip', 'txt')
 
 
-def evaluate_model_with_positions(env, model_file, positions, log_file):
-    model = algorithms["algorithm"].load(model_file)
+def evaluate_model_with_positions(env, model, positions, log_file):
     logger = env.get_logger()
     logger.open(log_file)
     eval_runs = 10
 
     for p in positions:
-
         cost = list()
         tip_cost = list()
         success = list()
@@ -107,7 +105,6 @@ def evaluate_model_with_positions(env, model_file, positions, log_file):
             distance=cost,
             tip_distance=tip_cost,
             success=success,
-            id_=p['id_'],
             steps=steps,
             collisions=collisions,
             quaternion_angle_costs=quaternion_angle_costs,
@@ -151,7 +148,7 @@ def evaluate(args):
         evaluate_model_without_positions(env, model, log_file)
     else:
         positions_file = open(args.positions_file)
-        positions = json.load(positions_file)
+        positions = json.load(positions_file)['positions']
         positions_file.close()
         evaluate_model_with_positions(env, model, positions, log_file)
     env.close()
@@ -183,15 +180,9 @@ if __name__ == "__main__":
         default='sac'
     )
     parser.add_argument(
-        '--settings-file',
-        '-sf',
-        default='settings/no_obstacles.json',
-        help='The path of the file specifying details of the experiment',
-    )
-    parser.add_argument(
         '--positions-file',
         '-pd',
-        default='positions/positions.json',
+        default='positions/prm.json',
         help='The path of the file containing the testing data. Should be used only for experiments without '
              'obstacles. To disable this option, set to "none"'
     )
