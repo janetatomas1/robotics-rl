@@ -102,6 +102,7 @@ def evaluate_model(env, model_file, positions, log_file):
             quaternion_cost=env.quaternion_angle_cost(),
             collisions=env.get_collision_count(),
             steps=env.get_steps(),
+            success=env.is_close(),
         ))
 
     logger.close()
